@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="短答チェック">
+<title>短答対策問題集｜科目選択</title>
+<style>
+:root{
+  --paper:#F4F5F1;
+  --panel:#FFFFFF;
+  --ink:#1B2229;
+  --ink-2:#4A555F;
+  --ink-3:#7E8A94;
+  --rule:#D9DDD5;
+  --rule-2:#E9ECE6;
+  --blue:#1F5673;
+  --sans:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Yu Gothic","Meiryo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
+  --radius:6px;
+}
+[data-theme="dark"]{
+  --paper:#14181C;
+  --panel:#1B2126;
+  --ink:#E7EAE5;
+  --ink-2:#AEB8BF;
+  --ink-3:#7A858D;
+  --rule:#2C343A;
+  --rule-2:#232A30;
+  --blue:#7FB4D0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  background-image:linear-gradient(rgba(31,86,115,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(31,86,115,.055) 1px,transparent 1px);
+  background-size:26px 26px;
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.6;
+  min-height:100vh;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+header{padding:28px 0 10px;text-align:center}
+.brand{font-family:var(--serif);font-size:22px;letter-spacing:.02em}
+.brand small{display:block;font-family:var(--sans);font-size:11px;color:var(--ink-3);letter-spacing:.12em;margin-top:6px}
+.cards{margin-top:22px;display:flex;flex-direction:column;gap:14px}
+a.card{
+  display:block;background:var(--panel);border:1px solid var(--rule);border-radius:var(--radius);
+  padding:18px 18px;text-decoration:none;color:inherit;position:relative;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+a.card:active{transform:scale(.98)}
+a.card .subj{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--ink)}
+a.card .meta{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+a.card .arrow{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--blue)}
+footer{text-align:center;font-size:11px;color:var(--ink-3);padding:34px 0}
+.note{font-size:12px;color:var(--ink-3);text-align:center;margin-top:26px;line-height:1.8}
+.iconbtn{position:fixed;top:14px;right:14px;width:36px;height:36px;border:1px solid var(--rule);border-radius:var(--radius);display:grid;place-items:center;background:var(--panel);color:inherit;cursor:pointer;font-size:14px}
+</style>
+</head>
+<body>
+<button class="iconbtn" id="btnTheme" title="表示切替">◐</button>
+<div class="wrap">
+  <header>
+    <div class="brand">短答対策 過去問チェック<small>公認会計士試験｜科目を選んでください</small></div>
+  </header>
+  <div class="cards">
+    <a class="card" href="./kanrikaikei.html">
+      <div class="subj">管理会計論</div>
+      <div class="meta">全16章・804問（過去問チェック）</div>
+      <div class="arrow">›</div>
+    </a>
+    <a class="card" href="./kigyoho.html">
+      <div class="subj">企業法</div>
+      <div class="meta">全15章・2313問</div>
+      <div class="arrow">›</div>
+    </a>
+    <a class="card" href="./zaimu.html">
+      <div class="subj">財務会計論（理論）</div>
+      <div class="meta">全26章・1108問</div>
+      <div class="arrow">›</div>
+    </a>
+    <a class="card" href="./kansa.html">
+      <div class="subj">監査論</div>
+      <div class="meta">全11章・1580問</div>
+      <div class="arrow">›</div>
+    </a>
+  </div>
+  <div class="note">各科目とも学習記録はこの端末のブラウザに保存されます。<br>ホーム画面に追加すると、アプリのように起動できます。</div>
+  <footer>短答対策問題集</footer>
+</div>
+<script>
+document.getElementById('btnTheme').onclick=()=>{
+  document.documentElement.dataset.theme = document.documentElement.dataset.theme==='dark' ? 'light':'dark';
+};
+</script>
+</body>
+</html>
