@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="英単語チェック">
+<title>公認会計士 短答式 英単語帳</title>
+<style>
+:root{
+  --paper:#F4F5F1;
+  --panel:#FFFFFF;
+  --ink:#1B2229;
+  --ink-2:#4A555F;
+  --ink-3:#7E8A94;
+  --rule:#D9DDD5;
+  --rule-2:#E9ECE6;
+  --red:#D62839;
+  --red-soft:#FBE7E9;
+  --blue:#1F5673;
+  --ok:#2F7A4F;
+  --warn:#B26A00;
+  --shade:rgba(27,34,41,.06);
+  --grid:rgba(31,86,115,.055);
+  --radius:3px;
+  --sans:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Yu Gothic","Meiryo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
+}
+[data-theme="dark"]{
+  --paper:#14181C;
+  --panel:#1B2126;
+  --ink:#E7EAE5;
+  --ink-2:#AEB8BF;
+  --ink-3:#7A858D;
+  --rule:#2C343A;
+  --rule-2:#232A30;
+  --red:#FF5C6B;
+  --red-soft:#3A1E22;
+  --blue:#7FB4D0;
+  --ok:#6FC28E;
+  --warn:#E0A14A;
+  --shade:rgba(0,0,0,.3);
+  --grid:rgba(127,180,208,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px;
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.wrap{max-width:860px;margin:0 auto;padding:0 14px}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:30;
+  background:var(--paper);
+  border-bottom:1px solid var(--rule);
+}
+.hd{display:flex;align-items:center;gap:10px;padding:10px 0 8px}
+.brand{font-family:var(--serif);font-size:19px;letter-spacing:.01em;line-height:1.2}
+.brand small{display:block;font-family:var(--sans);font-size:10.5px;color:var(--ink-3);letter-spacing:.14em}
+.hd-sp{flex:1}
+.iconbtn{width:38px;height:38px;border:1px solid var(--rule);border-radius:var(--radius);display:grid;place-items:center;font-size:15px;background:var(--panel)}
+.iconbtn[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.tabs{display:flex;gap:0;border:1px solid var(--rule);border-bottom:none;background:var(--panel)}
+.tabs button{flex:1;padding:9px 4px;font-size:13.5px;color:var(--ink-2);border-right:1px solid var(--rule);position:relative}
+.tabs button:last-child{border-right:none}
+.tabs button[aria-selected="true"]{color:var(--ink);font-weight:700;background:var(--paper)}
+.tabs button[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--red)}
+.meter{height:3px;background:var(--rule-2);display:flex}
+.meter i{display:block;height:100%}
+.meter .m3{background:var(--ok)} .meter .m2{background:var(--warn)} .meter .m1{background:var(--red)}
+
+/* ---------- filter bar ---------- */
+.filters{padding:10px 0 6px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;border:1px solid var(--rule);background:var(--panel);padding:0 10px;border-radius:var(--radius)}
+.search input{flex:1;border:none;background:none;padding:9px 0;outline:none;min-width:0}
+select{border:1px solid var(--rule);background:var(--panel);padding:9px 8px;border-radius:var(--radius);max-width:100%}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;border:1px solid var(--rule);background:var(--panel);padding:5px 11px;border-radius:99px;font-size:12.5px;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.count{font-size:12px;color:var(--ink-3);padding:4px 0 8px}
+
+/* ---------- list ---------- */
+.sec{margin:18px 0 6px;display:flex;align-items:baseline;gap:10px}
+.sec h2{font-size:13px;margin:0;letter-spacing:.04em;font-weight:700}
+.sec span{flex:1;border-bottom:1px dashed var(--rule)}
+.sec b{font-size:11px;color:var(--ink-3);font-weight:400}
+ol.list{list-style:none;margin:0;padding:0;background:var(--panel);border:1px solid var(--rule)}
+li.item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:0 12px;padding:9px 10px;border-bottom:1px solid var(--rule-2);align-items:start}
+li.item:last-child{border-bottom:none}
+.no{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums;padding-top:4px}
+.en{font-family:var(--serif);font-size:17px;line-height:1.35;word-break:break-word}
+.ja{font-size:14px;color:var(--ink-2);margin-top:2px}
+.note{font-size:11.5px;color:var(--ink-3);margin-top:3px;white-space:pre-line;border-left:2px solid var(--rule);padding-left:7px}
+.boxes{display:flex;gap:3px;padding-top:5px}
+.bx{width:15px;height:15px;border:1px solid var(--ink-3);border-radius:1px;background:transparent;padding:0;flex:none}
+.bx[aria-pressed="true"]{background:var(--red);border-color:var(--red);position:relative}
+.bx[aria-pressed="true"]::after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg)}
+.tools{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.spk{font-size:12px;color:var(--ink-3);padding:2px 4px}
+.mark{font-size:10px;padding:1px 6px;border:1px solid var(--rule);border-radius:99px;color:var(--ink-3)}
+.mark.s1{color:var(--red);border-color:var(--red)}
+.mark.s2{color:var(--warn);border-color:var(--warn)}
+.mark.s3{color:var(--ok);border-color:var(--ok)}
+
+/* ---------- red sheet ---------- */
+.hide .ja, .hide .note{position:relative;color:transparent}
+.hide .ja::before,.hide .note::before{
+  content:"";position:absolute;left:-2px;right:-2px;top:1px;bottom:1px;
+  background:var(--red);opacity:.88;border-radius:1px;
+}
+.hide .note::before{left:5px}
+.hide .revealed .ja,.hide .revealed .note{color:inherit}
+.hide .revealed .ja::before,.hide .revealed .note::before{display:none}
+li.item .ja,li.item .note{cursor:default}
+.hide li.item{cursor:pointer}
+
+/* ---------- card mode ---------- */
+.card{
+  background:var(--panel);border:1px solid var(--rule);
+  box-shadow:0 1px 0 var(--shade);
+  min-height:290px;display:flex;flex-direction:column;justify-content:center;
+  padding:28px 22px;text-align:center;margin-top:14px;position:relative;
+}
+.card .tag{position:absolute;top:10px;left:12px;font-size:11px;color:var(--ink-3)}
+.card .idx{position:absolute;top:10px;right:12px;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.card .front{font-family:var(--serif);font-size:clamp(26px,7vw,40px);line-height:1.25;word-break:break-word}
+.card .back{margin-top:16px;padding-top:16px;border-top:1px solid var(--rule-2)}
+.card .back .b-ja{font-size:clamp(18px,4.6vw,23px);font-weight:700}
+.card .back .b-note{font-size:13px;color:var(--ink-2);margin-top:8px;white-space:pre-line;text-align:left;display:inline-block;border-left:2px solid var(--red);padding-left:10px}
+.veil{color:var(--ink-3);font-size:13px;margin-top:18px}
+.grade{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.grade button{border:1px solid var(--rule);background:var(--panel);padding:13px 4px;border-radius:var(--radius);font-size:14px}
+.grade button b{display:block;font-size:11px;font-weight:400;color:var(--ink-3);margin-top:2px}
+.g1{color:var(--red)} .g2{color:var(--warn)} .g3{color:var(--ok)}
+.navrow{display:flex;gap:8px;margin-top:10px}
+.navrow button{flex:1;border:1px solid var(--rule);background:var(--panel);padding:11px;border-radius:var(--radius);font-size:14px}
+.btn-main{background:var(--ink)!important;color:var(--paper)!important;border-color:var(--ink)!important}
+
+/* ---------- quiz ---------- */
+.q-head{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3);margin-top:14px}
+.q-stem{background:var(--panel);border:1px solid var(--rule);padding:26px 18px;text-align:center;margin-top:6px}
+.q-stem .qt{font-family:var(--serif);font-size:clamp(22px,6vw,32px);line-height:1.3;word-break:break-word}
+.q-stem .qt.jp{font-family:var(--sans);font-weight:700;font-size:clamp(19px,5vw,26px)}
+.opts{display:grid;gap:8px;margin-top:10px}
+.opt{text-align:left;border:1px solid var(--rule);background:var(--panel);padding:13px 14px;border-radius:var(--radius);font-size:15px;display:flex;gap:10px;align-items:flex-start}
+.opt em{font-style:normal;color:var(--ink-3);font-size:12px;padding-top:2px;flex:none}
+.opt.correct{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--panel))}
+.opt.wrong{border-color:var(--red);background:var(--red-soft)}
+.opt:disabled{cursor:default}
+.q-result{margin-top:12px;background:var(--panel);border:1px solid var(--rule);padding:14px}
+.q-result .r-ja{font-weight:700}
+.q-result .r-note{font-size:12.5px;color:var(--ink-2);white-space:pre-line;margin-top:6px}
+.score{text-align:center;padding:40px 16px;background:var(--panel);border:1px solid var(--rule);margin-top:14px}
+.score .big{font-family:var(--serif);font-size:52px;line-height:1}
+
+/* ---------- stats ---------- */
+.stat-card{background:var(--panel);border:1px solid var(--rule);padding:14px;margin-top:12px}
+.stat-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--rule-2)}
+.stat-row:last-child{border-bottom:none}
+.stat-row .nm{width:98px;font-size:12.5px;flex:none}
+.bar{flex:1;height:9px;background:var(--rule-2);display:flex;overflow:hidden}
+.bar i{height:100%}
+.pc{width:52px;text-align:right;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;flex:none}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-3);margin-top:10px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:-1px}
+.lg3::before{background:var(--ok)} .lg2::before{background:var(--warn)} .lg1::before{background:var(--red)} .lg0::before{background:var(--rule-2)}
+.mini{font-size:12.5px;color:var(--ink-2);line-height:1.75}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.act button{border:1px solid var(--rule);background:var(--panel);padding:9px 13px;border-radius:var(--radius);font-size:13px}
+.act .danger{color:var(--red);border-color:var(--red)}
+.empty{text-align:center;color:var(--ink-3);padding:48px 16px;font-size:14px}
+.kbd{font-size:11.5px;color:var(--ink-3);margin-top:14px;line-height:1.9}
+.kbd kbd{border:1px solid var(--rule);border-bottom-width:2px;border-radius:3px;padding:1px 5px;font-family:ui-monospace,monospace;font-size:11px}
+footer{text-align:center;font-size:11px;color:var(--ink-3);padding:26px 0 34px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:99px;font-size:13px;z-index:60;opacity:0;pointer-events:none;transition:opacity .18s}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:520px){
+  li.item{gap:0 9px;padding:8px}
+  .bx{width:13px;height:13px}
+  .bx[aria-pressed="true"]::after{left:3px;top:0;width:3px;height:7px}
+  .en{font-size:16px}
+}
+
+.add-overlay{position:fixed;inset:0;background:rgba(20,20,20,.5);z-index:80;display:none;align-items:flex-end;justify-content:center}
+.add-modal{background:var(--panel);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:14px 14px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-sizing:border-box}
+.add-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.add-title{font-family:var(--serif);font-size:17px;font-weight:700}
+.add-body{display:flex;flex-direction:column}
+.flabel{font-size:11.5px;color:var(--ink-3);margin-top:12px;margin-bottom:4px;font-weight:700}
+.add-body input,.add-body select,.add-body textarea{width:100%;border:1px solid var(--rule);background:var(--paper);color:var(--ink);padding:9px 10px;border-radius:var(--radius);font-size:14px;resize:vertical;font-family:inherit}
+.add-foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:8px}
+.add-foot .danger{color:var(--red);border:1px solid var(--red);background:none;padding:10px 14px;border-radius:var(--radius);font-size:13px}
+.badge-custom{display:inline-block;font-size:10px;background:var(--blue);color:#fff;padding:1px 6px;border-radius:99px;margin-right:6px;vertical-align:middle}
+.edit-btn{font-size:10px;margin-top:4px}
+.stat-card input{width:100%;border:1px solid var(--rule);background:var(--paper);color:var(--ink);padding:9px 10px;border-radius:var(--radius);font-size:13px;margin-top:4px}
+.toolsL{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.memo-box{margin-top:10px}
+
+.memo-box label{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.memo-box textarea{width:100%;min-height:52px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);padding:8px 10px;font-size:13px;border-radius:var(--radius);resize:vertical;font-family:inherit}
+.memo-saved{font-size:10.5px;color:var(--ok);opacity:0;transition:opacity .3s}
+.memo-saved.show{opacity:1}
+.memo-preview{font-size:11.5px;color:var(--ink-3);margin-top:6px;white-space:pre-line;border-left:2px solid var(--blue);padding-left:7px;cursor:pointer}
+.tools button[data-memo-toggle]{margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="hd">
+      <div class="brand">短答式 英単語帳<small>CPA ENGLISH TERMS ver.2</small></div>
+      <div class="hd-sp"></div>
+      <button class="iconbtn" id="btnAdd" title="単語を追加">＋</button>
+      <button class="iconbtn" id="btnSheet" aria-pressed="false" title="赤シート（意味を隠す）">赤</button>
+      <button class="iconbtn" id="btnTheme" title="表示切替">◐</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-view="list">一覧</button>
+      <button role="tab" aria-selected="false" data-view="card">カード</button>
+      <button role="tab" aria-selected="false" data-view="quiz">テスト</button>
+      <button role="tab" aria-selected="false" data-view="stats">記録</button>
+    </div>
+  </div>
+  <div class="meter" id="meter"></div>
+</header>
+<main class="wrap" id="app"></main>
+<div class="add-overlay" id="addOverlay"></div>
+<footer>収録 664 語／出典：CPA会計学院『短答式試験対策 英単語帳 ver.2』（2027年合格目標）</footer>
+<div class="toast" id="toast"></div>
+<script>
+/* ====================== DATA ====================== */
+/* [英語, 日本語, 補足] */
+const DATA = [
+{c:"第1章 基本用語",secs:[
+ {s:"1. 会計期間",w:[
+  ["fiscal year (FY)","会計年度","accounting period：会計期間"],
+  ["prior period","前期",""],
+  ["current period","当期",""],
+  ["next period","翌期",""],
+  ["beginning of the period","期首",""],
+  ["during the period","期中",""],
+  ["end of the period","期末",""]]},
+ {s:"2. 会計処理",w:[
+  ["accounting treatment","会計処理",""],
+  ["recognition","認識",""],
+  ["measurement","測定",""],
+  ["valuation","評価",""]]},
+ {s:"3. 仕訳",w:[
+  ["journal entry","仕訳",""],
+  ["debit (Dr.)","借方",""],
+  ["credit (Cr.)","貸方",""]]},
+ {s:"4. 試算表",w:[
+  ["trial balance (T/B)","残高試算表",""],
+  ["pre-closing trial balance","決算整理前残高試算表",""]]},
+ {s:"5. 財務諸表に関する基本用語",w:[
+  ["financial statements (F/S)","財務諸表","financial documents：財務書類"],
+  ["income statement (I/S) / profit and loss statement (P/L)","損益計算書","IFRS statement of profit or loss：損益計算書"],
+  ["statement of comprehensive income (C/I)","包括利益計算書",""],
+  ["statement of changes in equity / statement of shareholders' equity (S/S)","株主資本等変動計算書","IFRS statement of changes in equity：持分変動計算書"],
+  ["balance sheet (B/S)","貸借対照表","IFRS statement of financial position：財政状態計算書"],
+  ["notes","注記",""],
+  ["investment decision-making","投資意思決定",""],
+  ["financial position","財政状態",""],
+  ["business performance","経営成績",""]]},
+ {s:"6. 簿記の5要素",w:[
+  ["assets","資産",""],
+  ["liabilities","負債",""],
+  ["net assets","純資産","IFRS equity：資本\nIFRSでは資産，負債，資本に区分する"],
+  ["revenue","収益",""],
+  ["expense","費用",""]]},
+ {s:"7. 利害関係者",w:[
+  ["shareholder","株主",""],
+  ["creditor","債権者",""]]},
+ {s:"8. 基本表現",w:[
+  ["general rule","原則",""],
+  ["transaction","取引",""],
+  ["consideration","対価",""],
+  ["gains","利得",""],
+  ["losses","損失",""],
+  ["increase","増加",""],
+  ["decrease","減少",""],
+  ["entity","企業",""],
+  ["competitor","競合他社",""],
+  ["external","外部の","internal：内部の"],
+  ["classify","〜を分類する",""],
+  ["adopt","〜を採用する",""],
+  ["calculate","〜を計算する",""],
+  ["exceed","〜を超える",""],
+  ["improve","〜を改善する",""],
+  ["include","〜を含む",""],
+  ["based on 〜","〜に基づいて",""],
+  ["compared to 〜","〜と比較して",""],
+  ["except for 〜","〜を除いて",""],
+  ["be expected to 〜","〜と見込まれる",""],
+  ["focus on 〜","〜に主眼を置く",""],
+  ["achieve","〜を達成する",""],
+  ["consider","〜を検討する",""],
+  ["following","次の",""]]}
+]},
+{c:"第2章 損益計算書",secs:[
+ {s:"損益計算書",w:[
+  ["sales","売上高",""],
+  ["cost of goods sold (COGS) / cost of sales (COS)","売上原価",""],
+  ["gross profit","売上総利益",""],
+  ["selling, general and administrative expenses (SG&A)","販売費及び一般管理費",""],
+  ["advertising expenses","広告宣伝費",""],
+  ["operating profit","営業利益",""],
+  ["non-operating income","営業外収益",""],
+  ["interest income","受取利息",""],
+  ["dividend income","受取配当金",""],
+  ["non-operating expenses","営業外費用",""],
+  ["interest expenses","支払利息",""],
+  ["ordinary profit","経常利益",""],
+  ["extraordinary gains","特別利益",""],
+  ["extraordinary losses","特別損失",""],
+  ["income before income taxes (IBIT)","税引前当期純利益","earnings before interest and taxes (EBIT)：利払前・税引前利益"],
+  ["income taxes","法人税等",""],
+  ["net income","当期純利益",""]]}
+]},
+{c:"第3章 貸借対照表",secs:[
+ {s:"1. 資産の部",w:[
+  ["current assets","流動資産",""],
+  ["cash and deposits","現金及び預金","time deposit：定期預金"],
+  ["notes receivable","受取手形",""],
+  ["accounts receivable (A/R)","売掛金",""],
+  ["prepaid expenses","前払費用",""],
+  ["accrued revenue","未収収益",""],
+  ["non-current assets / fixed assets","固定資産",""],
+  ["property, plant and equipment (PPE)","有形固定資産",""],
+  ["buildings","建物",""],
+  ["fixtures","備品",""],
+  ["machinery and equipment","機械装置",""],
+  ["vehicles","車両運搬具",""],
+  ["land","土地",""],
+  ["intangible fixed assets","無形固定資産",""],
+  ["goodwill","のれん",""],
+  ["investments and other assets","投資その他の資産",""],
+  ["long-term loans receivable","長期貸付金",""]]},
+ {s:"2. 負債の部",w:[
+  ["current liabilities","流動負債",""],
+  ["notes payable","支払手形",""],
+  ["accounts payable (A/P)","買掛金",""],
+  ["short-term borrowings / short-term loans payable","短期借入金",""],
+  ["unearned revenue","前受収益",""],
+  ["accrued expenses","未払費用",""],
+  ["non-current liabilities / fixed liabilities","固定負債",""]]},
+ {s:"3. 純資産の部",w:[
+  ["shareholders' equity","株主資本",""],
+  ["capital stock / common stock","資本金",""],
+  ["additional paid-in capital (APIC) / capital surplus","資本剰余金",""],
+  ["legal capital surplus / capital reserve","資本準備金",""],
+  ["other capital surplus","その他資本剰余金",""],
+  ["retained earnings","利益剰余金",""],
+  ["legal retained earnings / legal reserve","利益準備金",""],
+  ["other retained earnings","その他利益剰余金",""],
+  ["retained earnings brought forward","繰越利益剰余金",""],
+  ["reserve","積立金",""],
+  ["valuation difference on available-for-sale securities","その他有価証券評価差額金",""]]}
+]},
+{c:"第4章 財務会計論",secs:[
+ {s:"1. 概念フレームワーク",w:[
+  ["conceptual framework","概念フレームワーク",""],
+  ["reporting entity","報告主体",""],
+  ["economic resources","経済的資源",""],
+  ["relinquish","放棄する",""],
+  ["obligation","義務",""],
+  ["element","構成要素",""],
+  ["useful financial information","有用な財務情報",""],
+  ["provision of information","情報提供","provide：〜を提供する"],
+  ["material information","重要性のある情報","material：重要性のある"],
+  ["comparability","比較可能性",""],
+  ["going concern","継続企業",""],
+  ["internally generated goodwill","自己創設のれん",""]]},
+ {s:"2. 有価証券",w:[
+  ["securities","有価証券",""],
+  ["investment securities","投資有価証券",""],
+  ["trading securities","売買目的有価証券",""],
+  ["held-to-maturity securities / held-to-maturity bonds","満期保有目的の債券",""],
+  ["investments in subsidiaries","子会社株式",""],
+  ["investments in associates","関連会社株式",""],
+  ["available-for-sale securities","その他有価証券",""],
+  ["shares / stocks","株式",""],
+  ["bonds","債券","corporate bonds：社債"],
+  ["fair value","公正価値",""],
+  ["face value","額面金額",""],
+  ["interest rate","金利",""],
+  ["effective interest rate (EIR)","実効利子率",""],
+  ["amortized cost method","償却原価法",""],
+  ["effective interest method","利息法",""],
+  ["straight-line method","定額法",""],
+  ["maturity date","満期日",""],
+  ["interest payment date","利払日",""],
+  ["significantly","著しく",""],
+  ["decline","下落する",""],
+  ["shares without a market price","市場価格のない株式",""],
+  ["substantive value","実質価額",""],
+  ["unrealized gain","含み益",""]]},
+ {s:"3. 棚卸資産",w:[
+  ["inventory","棚卸資産","ending inventory：期末棚卸資産"],
+  ["merchandise","商品",""],
+  ["purchase","仕入",""],
+  ["return","返品","purchase returns：仕入戻し"],
+  ["discount","割引","purchase discounts：仕入割引"],
+  ["purchase price","購入代価",""],
+  ["incidental costs","付随費用",""],
+  ["acquisition cost","取得原価",""],
+  ["carrying amount","帳簿価額",""],
+  ["specific identification method","個別法",""],
+  ["first-in, first-out (FIFO) method","先入先出法",""],
+  ["moving-average method","移動平均法",""],
+  ["weighted-average method","総平均法",""],
+  ["last-in, first-out (LIFO) method","後入先出法",""],
+  ["physical inventory","実地棚卸",""],
+  ["inventory shrinkage","棚卸減耗",""],
+  ["market price","市場価格",""],
+  ["net selling value","正味売却価額",""],
+  ["net realizable value (NRV)","正味実現可能価額",""],
+  ["replacement cost","再調達原価",""],
+  ["unit price","単価",""],
+  ["decline in profitability","収益性の低下",""],
+  ["write-down","簿価切り下げ",""]]},
+ {s:"4. 有形固定資産",w:[
+  ["property, plant and equipment (PPE)","有形固定資産",""],
+  ["place into service","使用を開始する",""],
+  ["depreciation","減価償却",""],
+  ["accumulated depreciation","減価償却累計額",""],
+  ["straight-line method","定額法",""],
+  ["declining-balance method","定率法",""],
+  ["useful life","耐用年数",""],
+  ["remaining useful life","残存耐用年数",""],
+  ["residual value / salvage value","残存価額",""],
+  ["estimated disposal value","見積処分価額","estimate：〜を見積る"]]},
+ {s:"5. 純資産",w:[
+  ["new shares","新株",""],
+  ["issuance","発行","issue：〜を発行する"],
+  ["voting rights","議決権",""],
+  ["capital increase","増資",""],
+  ["amount paid-in","払込金額",""],
+  ["paid-in capital / contributed capital","払込資本",""],
+  ["shareholders' equity","株主資本",""],
+  ["capital transaction","資本取引",""],
+  ["profit and loss transaction","損益取引",""],
+  ["dividend","配当金",""],
+  ["distributable amount / amount available for distribution","分配可能額",""],
+  ["Companies Act","会社法",""]]},
+ {s:"6. 会計方針の注記",w:[
+  ["accounting policies","会計方針",""],
+  ["change","変更",""],
+  ["notes","注記",""],
+  ["consistent application","継続適用",""]]},
+ {s:"7. 収益認識",w:[
+  ["revenue recognition","収益認識",""],
+  ["contract","契約",""],
+  ["customer","顧客",""],
+  ["identification","識別","identify：〜を識別する"],
+  ["performance obligation","履行義務",""],
+  ["transaction price","取引価格",""],
+  ["allocation","配分","allocate：〜を配分する"],
+  ["stand-alone selling price","独立販売価格",""],
+  ["bundled selling price","セット販売価格",""],
+  ["residual approach","残余アプローチ",""],
+  ["transfer of control","支配の移転",""],
+  ["satisfaction","充足","satisfy：〜を充足する"],
+  ["at a point in time","一時点で",""],
+  ["over time","一定の期間にわたり",""],
+  ["contract asset","契約資産",""],
+  ["contract liability","契約負債",""],
+  ["refund liability","返金負債",""],
+  ["construction revenue","工事収益",""],
+  ["construction costs","工事原価",""],
+  ["measure of progress","進捗度",""],
+  ["input method based on costs / cost-to-cost method","コストに基づくインプット法",""],
+  ["cost-recovery method","原価回収基準",""]]},
+ {s:"8. 固定資産の減損",w:[
+  ["impairment","減損",""],
+  ["indication","兆候",""],
+  ["cash-generating unit (CGU)","資金生成単位",""],
+  ["undiscounted future cash flows","割引前将来キャッシュ・フロー",""],
+  ["recoverable amount","回収可能価額",""],
+  ["net selling value","正味売却価額",""],
+  ["estimated disposal costs","処分費用見込額",""],
+  ["value in use","使用価値",""],
+  ["impairment loss","減損損失",""],
+  ["reversal","戻入れ","reverse：〜を戻し入れる"]]},
+ {s:"9. 連結会計",w:[
+  ["consolidated financial statements","連結財務諸表",""],
+  ["group","企業集団",""],
+  ["control","支配",""],
+  ["consolidated subsidiary","連結子会社","subsidiary：子会社"],
+  ["acquisition date","取得日",""],
+  ["capital contribution","出資",""],
+  ["number of shares issued","発行済株式総数",""],
+  ["shares of Company S","S社株式",""],
+  ["interest","持分",""],
+  ["non-controlling interests (NCI)","非支配株主持分",""],
+  ["valuation difference","評価差額","valuation：評価"],
+  ["acquisition-related costs","取得関連費用",""],
+  ["receivables","債権",""],
+  ["payables","債務",""],
+  ["offset and eliminate","相殺消去する",""],
+  ["goods in transit","未達商品",""],
+  ["unrealized profit","未実現利益",""],
+  ["net income attributable to owners of the parent","親会社株主に帰属する当期純利益",""],
+  ["net income attributable to non-controlling interests","非支配株主に帰属する当期純利益",""]]},
+ {s:"10. 企業結合",w:[
+  ["business combination","企業結合",""],
+  ["merger","合併",""],
+  ["share exchange","株式交換",""],
+  ["share transfer","株式移転",""],
+  ["surviving company","存続会社",""],
+  ["disappearing company","消滅会社",""],
+  ["economic substance","経済的実態",""],
+  ["acquisition","取得","acquire：〜を取得する"],
+  ["acquirer","取得企業","-er：〜する側（能動）"],
+  ["acquiree","被取得企業","-ee：〜される側（受動）"],
+  ["market capitalization","時価総額",""],
+  ["exchange at equivalent value","等価交換",""],
+  ["identifiable","識別可能",""],
+  ["separable","分離可能",""],
+  ["intangible assets","無形資産",""],
+  ["amortization","（無形資産の）償却",""],
+  ["negative goodwill","負ののれん",""]]},
+ {s:"11. 外貨換算",w:[
+  ["foreign currency transactions","外貨建取引",""],
+  ["exchange rate","為替レート",""],
+  ["historical rate (HR)","取得時レート",""],
+  ["average rate (AR)","期中平均レート",""],
+  ["closing rate (CR)","決算日レート",""],
+  ["exchange rate at the settlement date","決済日レート",""],
+  ["foreign exchange gains (losses)","為替差益（損）",""],
+  ["foreign-currency-denominated","外貨建ての",""],
+  ["foreign subsidiary","在外子会社",""],
+  ["translate foreign currency into Japanese yen","外貨を円換算する",""]]},
+ {s:"12. その他",w:[
+  ["International Financial Reporting Standards (IFRS)","国際財務報告基準",""],
+  ["Japanese GAAP","日本基準",""],
+  ["practical guidelines / practical guidance","実務指針",""],
+  ["application guidance","適用指針",""],
+  ["normal operating cycle basis","正常営業循環基準",""],
+  ["one-year basis","一年基準",""]]}
+]},
+{c:"第5章 管理会計論",secs:[
+ {s:"1. 管理会計論全般で用いられる用語",w:[
+  ["account","会計 / 計算 / 勘定",""],
+  ["profit","利益",""],
+  ["rate","率，割合","関連：discount rate：割引率／tax rate：税率"],
+  ["allocation","配賦",""],
+  ["amount","金額，量",""],
+  ["quantity","数量",""],
+  ["variable costs","変動費","関連：semi-variable costs / mixed costs：準変動費"],
+  ["fixed costs","固定費","関連：semi-fixed costs / step costs：準固定費"],
+  ["traceable fixed costs","個別固定費",""],
+  ["common fixed costs","共通固定費",""],
+  ["〜 per unit","単位当たり〜","関連：costs per unit：単位当たり原価"],
+  ["target","目標","関連：target profit：利益目標"],
+  ["variance","差異",""],
+  ["favorable variance","有利差異","関連：credit variance：貸方差異"],
+  ["unfavorable variance","不利差異","関連：debit variance：借方差異"],
+  ["contribution margin","貢献利益","関連：marginal profit：限界利益"],
+  ["profit margin / profit margin ratio","利益率",""],
+  ["operating profit margin","営業利益率",""],
+  ["return on sales (ROS)","売上高利益率",""],
+  ["volume","営業量","関連：production volume：製造量"],
+  ["direct labor hours","直接作業時間",""],
+  ["machine hours","機械稼働時間",""],
+  ["acquisition cost","取得原価","acquisition：取得"],
+  ["book value / carrying amount","帳簿価額",""],
+  ["allowance / discount","値引",""],
+  ["sales price","販売価格",""],
+  ["market price / market value","市場価格",""],
+  ["estimated","見積りの",""],
+  ["normal","正常な",""],
+  ["manufacture","製造",""],
+  ["process","工程",""],
+  ["facilities / equipment","設備",""],
+  ["factory","工場",""],
+  ["depreciation","減価償却",""],
+  ["useful life","耐用年数",""],
+  ["residual value / salvage value","残存価額",""],
+  ["straight-line method","定額法",""],
+  ["land","土地",""],
+  ["investor","投資家",""],
+  ["creditor","債権者",""],
+  ["employee","従業員",""],
+  ["executives","役員",""],
+  ["manager","管理者",""],
+  ["workers","作業員",""],
+  ["representatives","担当者",""],
+  ["supervisors","監督者",""],
+  ["wages","賃金",""],
+  ["salary","給料",""],
+  ["bonus","賞与",""],
+  ["compensation","報酬",""],
+  ["motivation","動機付け",""]]},
+ {s:"2. 原価概念",w:[
+  ["cost accounting","原価計算",""],
+  ["actual cost","実際原価","actual：実際の"],
+  ["standard cost","標準原価","関連：cost standard：原価標準"],
+  ["differential cost","差額原価","関連：avoidable cost：回避可能原価"],
+  ["opportunity cost","機会原価","関連：opportunity loss：機会損失"],
+  ["sunk cost","埋没原価","関連：unavoidable cost：回避不能原価"],
+  ["relevant cost","関連原価","関連：irrelevant cost：無関連原価"],
+  ["future costs","未来原価",""],
+  ["past costs","過去原価",""]]},
+ {s:"3. 原価計算分野",w:[
+  ["absorption costing / full costing","全部原価計算","製品が固定費を absorption（吸収）する"],
+  ["direct costing","直接原価計算","関連：direct standard costing：直接標準原価計算"],
+  ["variable costing","変動原価計算","直接原価計算と同義"],
+  ["material costs","材料費",""],
+  ["labor costs","労務費，人件費",""],
+  ["direct costs","直接費",""],
+  ["direct material costs","直接材料費",""],
+  ["direct labor costs","直接労務費",""],
+  ["indirect costs","間接費","関連：factory overhead：製造間接費"],
+  ["indirect material costs","間接材料費",""],
+  ["indirect labor costs","間接労務費",""],
+  ["conversion costs / processing costs","加工費",""],
+  ["prime cost","素価",""],
+  ["raw materials","原材料",""],
+  ["purchase cost","購入原価",""],
+  ["predetermined price","予定価格",""],
+  ["buying commission","買入手数料",""],
+  ["freight-in","引取運賃",""],
+  ["handling expenses","荷役費",""],
+  ["insurance premium","保険料",""],
+  ["customs duty","関税",""],
+  ["working hours","就業時間",""],
+  ["direct labor hours","直接作業時間","関連：indirect labor hours：間接作業時間"],
+  ["setup hours","段取時間",""],
+  ["idle hours","手待時間",""],
+  ["work in process (WIP)","仕掛品",""],
+  ["finished goods","完成品",""],
+  ["first-in, first-out (FIFO) method","先入先出法",""],
+  ["average method","平均法",""],
+  ["product","製品",""],
+  ["spoilage","仕損（品）","関連：abnormal spoilage：異常仕損"],
+  ["spoilage costs","仕損費",""],
+  ["waste","減損","関連：abnormal waste：異常減損"],
+  ["activity level / capacity utilization","操業度",""],
+  ["department","部門",""],
+  ["assembly","組立",""],
+  ["cost variance","原価差異",""],
+  ["material-price variance","価格差異",""],
+  ["labor-rate variance","賃率差異",""]]},
+ {s:"4. 管理会計の基礎知識",w:[
+  ["management accounting","管理会計",""],
+  ["financial (performance) measures","財務尺度","関連：non-financial (performance) measures：非財務尺度"],
+  ["usefulness","有用性","管理会計情報の性質"],
+  ["relevance","目的適合性","管理会計情報の性質"],
+  ["timeliness","適時性 / 迅速性","管理会計情報の性質"],
+  ["responsibility center","責任センター",""],
+  ["cost center","原価センター","責任センター"],
+  ["revenue center","収益センター","責任センター"],
+  ["profit center","利益センター","責任センター"],
+  ["investment center","投資センター","責任センター"],
+  ["decision-making accounting","意思決定会計","経営管理機能に基づく管理会計の体系"],
+  ["performance management accounting","業績管理会計","経営管理機能に基づく管理会計の体系"],
+  ["project planning","個別計画設定",""],
+  ["period planning","期間計画設定",""],
+  ["strategy formulation","戦略策定","経営管理プロセスに基づく管理会計の体系"],
+  ["management control","マネジメント・コントロール","経営管理プロセスに基づく管理会計の体系"],
+  ["task control / operational control","タスク（オペレーショナル）・コントロール","経営管理プロセスに基づく管理会計の体系"],
+  ["balanced scorecard","バランスト・スコアカード（BSC）",""],
+  ["outcome measures","成果指標（成果尺度）",""],
+  ["performance drivers","先行指標（先行尺度）",""],
+  ["corporate strategy","企業戦略","経営戦略の分類の一つ"],
+  ["business strategy / business unit strategy","事業戦略","経営戦略の分類の一つ"],
+  ["competitive strategy","競争戦略",""],
+  ["cost leadership strategy","コストリーダーシップ戦略","競争戦略における基本戦略の一つ"],
+  ["differentiation strategy","差別化戦略","競争戦略における基本戦略の一つ"],
+  ["focus strategy","集中戦略","競争戦略における基本戦略の一つ"],
+  ["revenue management","レベニュー・マネジメント",""],
+  ["shared services","シェアード・サービス",""],
+  ["value chain","価値連鎖",""],
+  ["value engineering","価値工学（VE）","value（価値）＝function（機能）／cost（原価）"],
+  ["customer value","顧客価値",""]]},
+ {s:"5. 財務情報分析",w:[
+  ["return on assets","総資本利益率（ROA）","総資本事業利益率を指すことが多い"],
+  ["financial income","金融収益",""],
+  ["return on equity","自己資本利益率（ROE）",""],
+  ["financial leverage","財務レバレッジ",""],
+  ["return on invested capital","投下資本利益率（ROIC）",""],
+  ["net working capital","正味運転資本","working capital：運転資本"],
+  ["turnover","回転率","回転期間（turnover period）の逆数"],
+  ["total asset turnover","総資産回転率",""],
+  ["turnover period","回転期間","回転率（turnover）の逆数\n回転期間の日数は \"days\" とも表される"],
+  ["accounts payable turnover period","買掛金回転期間","関連：days payable outstanding (DPO)：買掛金回転日数"],
+  ["accounts receivable turnover period","売掛金回転期間","関連：days sales outstanding (DSO)：売掛金回転日数"],
+  ["inventory turnover period","棚卸資産回転期間","関連：days sales in inventory (DIO)：棚卸資産回転日数"],
+  ["solvency analysis","安全性分析","solvency：支払能力\n関連：liquidity：流動性"],
+  ["short-term","短期の",""],
+  ["long-term","長期の",""],
+  ["current ratio","流動比率",""],
+  ["quick ratio / acid-test ratio","当座比率",""],
+  ["equity ratio","自己資本比率",""],
+  ["debt-equity ratio","負債比率（D/Eレシオ）",""],
+  ["debt to assets ratio","負債対総資産比率","負債依存度ともいう"],
+  ["fixed assets ratio / fixed ratio","固定比率",""],
+  ["ratio of fixed assets to long-term capital","固定長期適合率","long-term capital：長期資本（自己資本＋固定負債）"],
+  ["interest coverage ratio","インタレスト・カバレッジ・レシオ",""]]},
+ {s:"6. 短期利益計画のための管理会計",w:[
+  ["short-term profit planning","短期利益計画",""],
+  ["CVP analysis / Cost-Volume-Profit analysis","CVP分析",""],
+  ["planned sales","計画売上高","planned：計画された"],
+  ["break-even point (BEP)","損益分岐点","関連：break-even sales：損益分岐点売上高"],
+  ["margin of safety ratio","安全余裕率",""],
+  ["degree of operating leverage (DOL)","経営レバレッジ係数",""],
+  ["cost behavior","原価態様",""],
+  ["industrial engineering method","IE法（技術的予測法）",""],
+  ["capacity costs","キャパシティ・コスト",""],
+  ["committed costs","コミッテド・コスト",""],
+  ["managed costs","マネジド・コスト",""]]},
+ {s:"7. 意思決定会計",w:[
+  ["decision making","意思決定",""],
+  ["operational decision-making / tactical decision-making","業務的意思決定（戦術的意思決定）",""],
+  ["make-or-buy decision","自製か購入かの意思決定",""],
+  ["special order decision","受注可否の意思決定",""],
+  ["economic order quantity","経済的発注量（EOQ）",""],
+  ["strategic decision-making","戦略的意思決定","strategy：戦略"],
+  ["capital investment","設備投資",""],
+  ["initial investment","初期投資",""],
+  ["earnings before interest and taxes (EBIT)","利払前・税引前利益","設備投資の問題では営業利益と解釈してよい"],
+  ["free cash flow","フリー・キャッシュ・フロー（FCF）","一般に \"〜to equity (FCFE)\" ではなく \"〜to firm (FCFF)\" を指す"],
+  ["weighted average cost of capital","加重平均資本コスト（WACC）","cost of capital：資本コスト"],
+  ["interest-bearing debt / interest-bearing liabilities","有利子負債",""],
+  ["invested capital","投下資本",""],
+  ["independent projects","独立投資案",""],
+  ["mutually exclusive projects","相互排他的投資案",""],
+  ["investment appraisal","投資評価",""],
+  ["discounted cash flow (DCF) method","割引キャッシュ・フロー（DCF）法",""],
+  ["net present value (NPV) method","正味現在価値（NPV）法",""],
+  ["internal rate of return (IRR) method","内部利益率（IRR）法",""],
+  ["payback period (PP) method","回収期間法","関連：discounted payback period method：割引回収期間法"],
+  ["profitability index (PI) method","収益性指数法",""],
+  ["tax shield","節税効果",""],
+  ["present value factor","現価係数","関連：present value of an annuity factor (PVAF)：年金現価係数"]]},
+ {s:"8. 分権化組織とグループ経営の管理会計",w:[
+  ["centralized organization","集権的組織",""],
+  ["functional organization","職能別組織",""],
+  ["decentralized organization","分権化組織",""],
+  ["divisional organization","事業部制組織","division：事業部"],
+  ["return on investment","投資利益率（ROI）",""],
+  ["residual income","残余利益（RI）",""],
+  ["controllability","管理可能性",""],
+  ["controllable cost","管理可能費","関連：uncontrollable cost：管理不能費"],
+  ["traceability","追跡可能性",""],
+  ["common cost","共通費",""],
+  ["internal capital","社内資本金","internal：内部の"],
+  ["internal interest rate","社内金利","internal：内部の"],
+  ["transfer price","振替価格",""],
+  ["market-based transfer price","市価基準の振替価格",""],
+  ["market-minus transfer price","市価差引基準の振替価格",""],
+  ["mini-profit center","ミニ・プロフィット・センター",""],
+  ["Economic Value Added / EVA","経済的付加価値（EVA）","EVA＝NOPAT −invested capital（投下資本）×WACC"],
+  ["net operating profit after tax","税引後営業利益（NOPAT）",""]]}
+]},
+{c:"第6章 監査論",secs:[
+ {s:"0. 基本用語",w:[
+  ["audit","監査",""],
+  ["auditor","監査人","Certified Public Accountant / CPA：公認会計士"],
+  ["audit engagement","監査業務 / 監査契約","audit engagement letter：監査契約書"],
+  ["independent auditor's report","独立監査人の監査報告書","independent：独立した"],
+  ["financial statements","財務諸表（計算書類）","financial documents：財務書類\nfinancial information：財務情報"],
+  ["misstatement","虚偽表示","material misstatement：重要な虚偽表示\nmisstatements, individually or in the aggregate：個別に又は集計した虚偽表示"],
+  ["fraud","不正","error：誤謬"],
+  ["disclosure","開示",""],
+  ["management","経営者",""],
+  ["the entity being audited / the entity subject to the audit / client / auditee","被監査会社",""],
+  ["users of financial statements","財務諸表利用者","users of auditor's report：監査報告書利用者\nstakeholders：利害関係者\ninvestor：投資家"],
+  ["audit & supervisory board member / corporate auditor","監査役","those charged with governance：ガバナンスに責任を有する者（監査役等）"],
+  ["internal auditors","内部監査人",""],
+  ["(internal) controls","内部統制",""],
+  ["corporate governance","コーポレート・ガバナンス",""],
+  ["auditing standards generally accepted in Japan","我が国において一般に公正妥当と認められる監査の基準","Generally Accepted Auditing Standards (GAAS)：一般に公正妥当と認められる監査の基準"],
+  ["auditing standards","監査基準",""],
+  ["The Japanese Institute of Certified Public Accountants / JICPA","日本公認会計士協会",""],
+  ["Certified Public Accountants and Auditing Oversight Board / CPAAOB","公認会計士・監査審査会",""],
+  ["firm","監査事務所",""],
+  ["engagement team","監査チーム",""],
+  ["engagement partner","監査責任者",""],
+  ["assistant","監査補助者",""],
+  ["professional standards","職業的専門家としての基準及び適用される法令等",""],
+  ["relevant ethical requirements","我が国における職業倫理に関する規定",""],
+  ["review","査閲",""],
+  ["engagement quality (control) review","審査",""],
+  ["engagement quality reviewer","審査担当者",""],
+  ["date of approval of the financial statements","財務諸表の承認日",""],
+  ["signature / sign-off","署名",""],
+  ["subsequent events","後発事象",""],
+  ["going concern assumption","継続企業の前提",""],
+  ["material uncertainty","重要な不確実性",""],
+  ["fraudulent financial reporting","不正な財務報告",""],
+  ["misappropriation of assets","資産の流用",""],
+  ["risks of fraud","不正リスク",""],
+  ["fraud risk factors","不正リスク要因","incentive：動機／pressure：プレッシャー\nopportunity：機会\nattitude：姿勢／rationalization：正当化"],
+  ["visiting location","往査先",""],
+  ["non-compliance","違法行為",""],
+  ["deficiency in internal control","内部統制の不備",""],
+  ["Certified Public Accountants Act","公認会計士法",""],
+  ["audit certification (services)","監査証明業務",""],
+  ["non-audit services","非監査業務",""],
+  ["code (of ethics)","倫理規則",""],
+  ["fundamental principles","基本原則","integrity：誠実性／objectivity：客観性\nprofessional competence and due care：職業的専門家としての能力及び正当な注意\nconfidentiality：守秘義務（秘密保持）\nprofessional behavior：職業的専門家としての行動"],
+  ["threats","阻害要因","self-interest threats：自己利益\nself-review threats：自己レビュー\nadvocacy threats：擁護\nfamiliarity threats：馴れ合い\nintimidation threats：不当なプレッシャー"],
+  ["safeguards","セーフガード",""],
+  ["board of directors","取締役会",""],
+  ["company with company auditors","監査役設置会社",""],
+  ["audit & supervisory board / board of company auditors","監査役会",""],
+  ["company with a board of company auditors","監査役会設置会社",""],
+  ["audit committee","監査委員会",""],
+  ["company with nominating committee, etc.","指名委員会等設置会社",""],
+  ["audit and supervisory committee","監査等委員会",""],
+  ["company with an audit and supervisory committee","監査等委員会設置会社",""]]},
+ {s:"1-1. 監査総論",w:[
+  ["materiality","重要性",""],
+  ["in all material respects","全ての重要な点において",""],
+  ["reasonable assurance","合理的な保証",""],
+  ["level of assurance","保証水準",""],
+  ["acceptably low level","許容可能な低い水準",""],
+  ["applicable financial reporting framework","適用される財務報告の枠組み",""],
+  ["general purpose financial statements","一般目的の財務諸表","special purpose financial statements：特別目的の財務諸表"],
+  ["general purpose framework","一般目的の財務報告の枠組み","special purpose framework：特別目的の財務報告の枠組み"],
+  ["opinion on the fairness","適正性に関する意見","fairness：適正性\nopinion on compliance：準拠性に関する意見"],
+  ["fair presentation framework","適正表示の枠組み","compliance framework：準拠性の枠組み"],
+  ["distinction between responsibilities of auditor and management","二重責任の原則",""],
+  ["expectation gap","期待ギャップ",""],
+  ["inherent limitations of an audit","監査の固有の限界",""]]},
+ {s:"2-1. 監査主体論総論",w:[
+  ["professional competence","職業的専門家としての専門能力",""],
+  ["attitude of fairness and impartiality","公正不偏の態度",""],
+  ["independence","独立性","independence of mind：精神的独立性\nindependence in appearance：外観的独立性"],
+  ["professional due care","職業的専門家としての正当な注意",""],
+  ["professional skepticism","職業的専門家としての懐疑心（職業的懐疑心）",""],
+  ["(duty of) confidentiality","守秘義務（秘密保持）",""],
+  ["professional judgment","職業的専門家としての判断",""]]},
+ {s:"3-1. 監査実施論総論",w:[
+  ["assertions","アサーション（監査要点）","relevant assertions：関連するアサーション"],
+  ["existence","実在性",""],
+  ["completeness","網羅性",""],
+  ["valuation","評価",""],
+  ["accuracy","正確性",""],
+  ["occurrence","発生",""],
+  ["cutoff","期間帰属",""],
+  ["audit evidence","監査証拠",""],
+  ["sufficient appropriate audit evidence","十分かつ適切な監査証拠","sufficiency (of audit evidence)：（監査証拠の）十分性\nappropriateness (of audit evidence)：（監査証拠の）適切性"],
+  ["relevance and reliability","適合性と信頼性",""],
+  ["management's expert","経営者の利用する専門家",""],
+  ["accounting records","会計記録",""],
+  ["audit procedures","監査手続","alternative audit procedures：代替的な監査手続"],
+  ["nature, timing and extent","（手続の）種類，時期及び範囲",""],
+  ["inspection of records or documents","記録や文書の閲覧",""],
+  ["inspection of tangible assets","実査","cash count：現金実査"],
+  ["observation","観察",""],
+  ["recalculation","再計算",""],
+  ["reperformance","再実施",""],
+  ["inquiry","質問",""],
+  ["testing all items in a population","精査",""],
+  ["testing some selected items in a population","試査",""],
+  ["testing specific items","特定項目抽出による試査",""],
+  ["audit sampling","監査サンプリング",""]]},
+ {s:"3-2. 確認",w:[
+  ["external confirmation","確認",""],
+  ["positive confirmation request","積極的確認","negative confirmation request：消極的確認"],
+  ["confirming party","確認回答者",""],
+  ["non-response","未回答",""],
+  ["exception (in relation to confirmation)","確認差異","discrepancy：差異"]]},
+ {s:"3-3. 分析的手続",w:[
+  ["analytical procedures","分析的手続",""],
+  ["substantive analytical procedures","分析的実証手続",""],
+  ["analytical procedures near the end of the audit that assist the auditor when forming an overall conclusion","全般的結論を形成するための分析的手続",""]]},
+ {s:"3-4. 内部統制",w:[
+  ["system of internal control","内部統制システム",""],
+  ["control environment","統制環境",""],
+  ["entity's risk assessment process","企業のリスク評価プロセス",""],
+  ["entity's process to monitor the system of internal control","内部統制システムを監視する企業のプロセス",""],
+  ["information system and communication","情報システムと伝達",""],
+  ["control activities","統制活動",""]]},
+ {s:"3-5〜7. リスク・アプローチ監査関連",w:[
+  ["risk-based approach","リスク・アプローチ",""],
+  ["audit risk","監査リスク",""],
+  ["risk of material misstatement","重要な虚偽表示リスク","risks of material misstatement at the financial statement level：財務諸表全体レベルの重要な虚偽表示リスク\nrisks of material misstatement at the assertion level：アサーション・レベルの重要な虚偽表示リスク"],
+  ["inherent risk","固有リスク","inherent risk factors：固有リスク要因"],
+  ["control risk","統制リスク",""],
+  ["detection risk","発見リスク",""],
+  ["business risk","事業上のリスク",""],
+  ["risk assessment procedures","リスク評価手続","test of design：デザインの評価"],
+  ["walk-through test","ウォークスルー",""],
+  ["further audit procedures","リスク対応手続",""],
+  ["tests of controls","運用評価手続","test of operating effectiveness：運用状況の評価"],
+  ["substantive procedure","実証手続",""],
+  ["test of detail","詳細テスト",""],
+  ["overall responses","全般的な対応",""],
+  ["class of transactions, account balance or disclosure","取引種類，勘定残高又は注記事項","significant 〜：重要な取引種類，勘定残高又は注記事項\nmaterial 〜：重要性のある取引種類，勘定残高又は注記事項"],
+  ["dual-purpose test","二重目的テスト",""]]},
+ {s:"3-8. 特別な検討を必要とするリスク",w:[
+  ["significant risk","特別な検討を必要とするリスク",""]]},
+ {s:"3-9. 監査の計画及び実施における重要性",w:[
+  ["materiality for the financial statements as a whole","重要性の基準値",""],
+  ["materiality level or levels for particular classes of transactions, account balances or disclosures","特定の取引種類，勘定残高又は注記事項に対する重要性の基準値",""],
+  ["performance materiality","手続実施上の重要性",""]]},
+ {s:"3-10. 監査の過程で識別した虚偽表示の評価",w:[
+  ["clearly trivial","明らかに僅少なもの",""],
+  ["uncorrected misstatements","未修正の虚偽表示",""],
+  ["undetected misstatements","未発見の虚偽表示",""],
+  ["financial aspects","金額的な側面",""],
+  ["qualitative aspects","質的な側面",""]]},
+ {s:"3-11. 監査計画",w:[
+  ["audit plan","監査計画",""],
+  ["overall audit strategy","監査の基本的な方針",""],
+  ["(detailed) audit plan","詳細な監査計画",""],
+  ["continuing audit / recurring audit","継続監査","initial audit engagement：初年度監査"]]},
+ {s:"3-12. 監査調書",w:[
+  ["audit documentation / engagement documentation","監査調書",""],
+  ["audit file","監査ファイル",""],
+  ["experienced auditor","経験豊富な監査人",""]]},
+ {s:"3-13. 監査サンプリング",w:[
+  ["population","母集団",""],
+  ["statistical sampling","統計的サンプリング","non-statistical sampling：非統計的サンプリング"],
+  ["expected rate of deviation","予想逸脱率","tolerable rate of deviation：許容逸脱率"],
+  ["expected misstatement","予想虚偽表示額","tolerable misstatement：許容虚偽表示額"],
+  ["anomaly","例外的事象",""]]},
+ {s:"3-14. 会計上の見積りの監査",w:[
+  ["accounting estimate","会計上の見積り",""],
+  ["estimation uncertainty","見積りの不確実性","complexity：複雑性／subjectivity：主観性"],
+  ["management's point estimate","経営者の見積額",""],
+  ["outcome of an accounting estimate","会計上の見積りの確定額",""],
+  ["auditor's point estimate or auditor's range","監査人の見積額又は監査人の見積りの許容範囲",""],
+  ["management bias","経営者の偏向",""],
+  ["retrospective review","遡及的な検討",""],
+  ["methods","見積手法",""],
+  ["assumptions","（会計上の見積りにおける）仮定",""],
+  ["data","（会計上の見積りにおける）データ",""]]},
+ {s:"3-15. 経営者確認書",w:[
+  ["written representation (from management)","経営者確認書",""]]},
+ {s:"3-16. 特定項目の監査証拠",w:[
+  ["attendance at physical inventory counting","実地棚卸の立会",""],
+  ["test counts","テスト・カウント",""]]},
+ {s:"4-2. 監査報告書の基本形",w:[
+  ["audit opinion","監査意見",""],
+  ["basis for opinion","意見の根拠",""],
+  ["date of the auditor's report","監査報告書日",""],
+  ["financial position, financial performance and cash flows","財政状態，経営成績，キャッシュ・フローの状況",""],
+  ["forming an opinion","意見を形成すること",""]]},
+ {s:"4-3. 除外事項",w:[
+  ["unmodified opinion","無限定意見（無限定適正意見）",""],
+  ["modified opinion","除外事項付意見",""],
+  ["qualified opinion","限定意見（限定付適正意見）",""],
+  ["adverse opinion","不適正意見（否定的意見）",""],
+  ["disclaimer of opinion","意見不表明",""],
+  ["limitation on the scope of the audit","監査範囲の制約",""],
+  ["pervasive","広範な",""]]},
+ {s:"4-4. 監査上の主要な検討事項",w:[
+  ["key audit matters","監査上の主要な検討事項",""]]},
+ {s:"5-1. グループ監査における特別な考慮事項",w:[
+  ["component","構成単位",""],
+  ["aggregation risk","合算リスク",""],
+  ["instruction","指示書",""],
+  ["early warning memorandum","早期警告メモ",""]]},
+ {s:"5-2. 専門家の業務の利用",w:[
+  ["expertise","専門知識",""],
+  ["auditor's expert","監査人の利用する専門家",""]]},
+ {s:"5-3. 内部監査人の作業の利用",w:[
+  ["internal audit function","内部監査機能",""]]}
+]}
+];
+
+/* ====================== STATE ====================== */
+let WORDS=[];
+let customWords=[];
+const CKEY="cpa_tantou_vocab_custom_v1";
+function loadCustomWords(){
+  try{const r=localStorage.getItem(CKEY);customWords=r?JSON.parse(r):[];}catch(e){customWords=[];}
+}
+function saveCustomWords(){
+  try{localStorage.setItem(CKEY,JSON.stringify(customWords));}catch(e){}
+  touchUpdated();
+}
+function rebuildWords(){
+  WORDS=[];
+  DATA.forEach((ch,ci)=>{let n=0;ch.secs.forEach(sec=>{sec.w.forEach(w=>{n++;
+    WORDS.push({id:ci+"-"+n,ci,ch:ch.c,sec:sec.s,no:n,en:w[0],ja:w[1],note:w[2]||"",custom:false});
+  });});});
+  customWords.forEach((w,i)=>{
+    const ch=DATA[w.ci];
+    WORDS.push({id:w.id,ci:w.ci,ch:ch?ch.c:"追加した単語",sec:w.sec||"自分で追加した単語",
+      no:i+1,en:w.en,ja:w.ja,note:w.note||"",custom:true});
+  });
+}
+
+const KEY="cpa_tantou_vocab_v2";
+let mem={};
+const store={
+  load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):{}}catch(e){return mem}},
+  save(o){mem=o;try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+};
+let P=store.load();
+loadCustomWords();
+rebuildWords();
+const rec=id=>P[id]||(P[id]={s:0,b:[0,0,0]});
+const save=()=>{store.save(P);touchUpdated();};
+
+/* ---------- personal memos ---------- */
+const NKEY="cpa_tantou_vocab_notes_v1";
+let notes={};
+try{const r=localStorage.getItem(NKEY);notes=r?JSON.parse(r):{};}catch(e){notes={};}
+let noteSaveTimer=null;
+function scheduleSaveNote(id,text){
+  notes[id]=text;
+  if(noteSaveTimer) clearTimeout(noteSaveTimer);
+  noteSaveTimer=setTimeout(()=>{
+    try{localStorage.setItem(NKEY,JSON.stringify(notes));}catch(e){}
+    touchUpdated();
+    document.querySelectorAll('[data-memo-saved="'+id+'"]').forEach(el=>{
+      el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200);
+    });
+  },500);
+}
+let expandedMemos=new Set();
+
+/* ---------- CLOUD SYNC (optional, Firebase Realtime Database via REST) ---------- */
+const SUBJECT_KEY='vocab';
+const LS_UPDATED_KEY=KEY+"_updated_v1";
+const SYNC_URL_KEY='qsync_dburl_v1';
+const SYNC_CODE_KEY='qsync_code_v1';
+let localUpdatedAt=0;
+try{ const u=localStorage.getItem(LS_UPDATED_KEY); localUpdatedAt = u? (parseInt(u,10)||0) : 0; }catch(e){ localUpdatedAt=0; }
+let cloudPushTimer=null;
+function touchUpdated(){
+  localUpdatedAt=Date.now();
+  try{ localStorage.setItem(LS_UPDATED_KEY,String(localUpdatedAt)); }catch(e){}
+  scheduleCloudPush();
+}
+function getSyncConfig(){
+  let url='',code='';
+  try{ url=(localStorage.getItem(SYNC_URL_KEY)||'').trim(); code=(localStorage.getItem(SYNC_CODE_KEY)||'').trim(); }catch(e){}
+  if(!url||!code) return null;
+  return {url,code};
+}
+function cloudPath(cfg){
+  return cfg.url.replace(/\/+$/,'') + '/quizSync/' + encodeURIComponent(cfg.code) + '/' + SUBJECT_KEY + '.json';
+}
+function scheduleCloudPush(){
+  const cfg=getSyncConfig(); if(!cfg) return;
+  if(cloudPushTimer) clearTimeout(cloudPushTimer);
+  cloudPushTimer=setTimeout(()=>{ pushToCloud(cfg); },1500);
+}
+async function pushToCloud(cfg){
+  cfg = cfg||getSyncConfig(); if(!cfg) return false;
+  try{
+    await fetch(cloudPath(cfg), {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({P,customWords,notes,updatedAt:localUpdatedAt})
+    });
+    return true;
+  }catch(e){ return false; }
+}
+async function pullFromCloud(showToast){
+  const cfg=getSyncConfig(); if(!cfg) return false;
+  try{
+    const res=await fetch(cloudPath(cfg));
+    if(!res.ok) return false;
+    const data=await res.json();
+    if(!data || !data.updatedAt || data.updatedAt<=localUpdatedAt) return false;
+    P=data.P||{};
+    customWords=data.customWords||[];
+    notes=data.notes||{};
+    localUpdatedAt=data.updatedAt||0;
+    try{
+      localStorage.setItem(KEY,JSON.stringify(P));
+      localStorage.setItem(CKEY,JSON.stringify(customWords));
+      localStorage.setItem(NKEY,JSON.stringify(notes));
+      localStorage.setItem(LS_UPDATED_KEY,String(localUpdatedAt));
+    }catch(e){}
+    rebuildWords();
+    meter();
+    if(S.view!=='quiz') render();
+    if(showToast) toast('他の端末の学習記録を読み込みました');
+    return true;
+  }catch(e){ return false; }
+}
+function randomSyncCode(){
+  const chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let s=''; for(let i=0;i<20;i++) s+=chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+function syncSettingsHTML(){
+  let url='',code='';
+  try{ url=(localStorage.getItem(SYNC_URL_KEY)||'').trim(); code=(localStorage.getItem(SYNC_CODE_KEY)||'').trim(); }catch(e){ return '<div class="mini">このブラウザでは同期機能を使えません。</div>'; }
+  if(!url){
+    return `<div class="flabel">データベースURL（Firebaseコンソールで確認）</div>
+      <input id="cloudUrlInput" placeholder="https://xxxx-default-rtdb.firebaseio.com">
+      <div class="act"><button id="cloudUrlSave" class="btn-main">保存</button></div>`;
+  }
+  if(!code){
+    return `<div class="mini">データベースURL：<code style="font-size:11px">${esc(url)}</code> <button id="cloudUrlEdit" style="font-size:11px;text-decoration:underline;color:var(--blue)">変更</button></div>
+      <div class="act" style="margin-top:10px"><button id="cloudGenBtn" class="btn-main">この端末を1台目にして同期コードを発行</button></div>
+      <div class="flabel" style="margin-top:16px">他の端末で発行したコードをお持ちの場合</div>
+      <input id="cloudCodeInput" placeholder="同期コードを貼り付け">
+      <div class="act"><button id="cloudJoinBtn">このコードで同期を開始</button></div>`;
+  }
+  const lastSync = localUpdatedAt? new Date(localUpdatedAt).toLocaleString('ja-JP') : '未同期';
+  return `<div class="mini">データベースURL：<code style="font-size:11px">${esc(url)}</code></div>
+    <div class="flabel">同期コード（他の端末にも入力してください）</div>
+    <input id="cloudCodeShow" readonly value="${esc(code)}" style="font-family:monospace;font-size:15px;letter-spacing:.05em">
+    <div class="act">
+      <button id="cloudCopyCode">コピー</button>
+      <button id="cloudNowBtn">🔄 今すぐ同期</button>
+    </div>
+    <div class="mini" style="margin-top:8px">最終同期：${lastSync}</div>
+    <div class="act" style="margin-top:12px"><button id="cloudUnlink" style="color:var(--red);border-color:var(--red)">この端末の同期を解除</button></div>`;
+}
+function bindSyncSettings(){
+  const us=$('#cloudUrlSave');
+  if(us) us.onclick=()=>{
+    const v=$('#cloudUrlInput').value.trim();
+    if(!v){ toast('URLを入力してください'); return; }
+    try{ localStorage.setItem(SYNC_URL_KEY,v); }catch(e){}
+    renderSyncSettings();
+  };
+  const ue=$('#cloudUrlEdit');
+  if(ue) ue.onclick=()=>{
+    if(confirm('データベースURLを変更しますか？（同期コードも解除されます）')){
+      try{ localStorage.removeItem(SYNC_URL_KEY); localStorage.removeItem(SYNC_CODE_KEY); }catch(e){}
+      renderSyncSettings();
+    }
+  };
+  const gen=$('#cloudGenBtn');
+  if(gen) gen.onclick=async()=>{
+    const code=randomSyncCode();
+    try{ localStorage.setItem(SYNC_CODE_KEY,code); }catch(e){}
+    touchUpdated();
+    await pushToCloud();
+    toast('同期コードを発行しました');
+    renderSyncSettings();
+  };
+  const jo=$('#cloudJoinBtn');
+  if(jo) jo.onclick=async()=>{
+    const v=$('#cloudCodeInput').value.trim();
+    if(!v){ toast('コードを入力してください'); return; }
+    try{ localStorage.setItem(SYNC_CODE_KEY,v); }catch(e){}
+    const got=await pullFromCloud(true);
+    if(!got) toast('コードを保存しました（クラウドにまだデータがありません）');
+    renderSyncSettings();
+  };
+  const cc=$('#cloudCopyCode');
+  if(cc) cc.onclick=async()=>{
+    const el=$('#cloudCodeShow'); el.select();
+    try{ await navigator.clipboard.writeText(el.value); toast('コピーしました'); }
+    catch(e){ document.execCommand('copy'); toast('コピーしました'); }
+  };
+  const nb=$('#cloudNowBtn');
+  if(nb) nb.onclick=async()=>{
+    await pushToCloud();
+    await pullFromCloud(true);
+    renderSyncSettings();
+    toast('同期しました');
+  };
+  const ul=$('#cloudUnlink');
+  if(ul) ul.onclick=()=>{
+    if(confirm('この端末の同期を解除しますか？（データは削除されません）')){
+      try{ localStorage.removeItem(SYNC_CODE_KEY); }catch(e){}
+      renderSyncSettings();
+    }
+  };
+}
+function renderSyncSettings(){
+  const el=$('#cloudSyncBox'); if(!el) return;
+  el.innerHTML=syncSettingsHTML();
+  bindSyncSettings();
+}
+
+const S={
+  view:"list", ch:"all", sec:"all", status:"all", q:"",
+  sheet:false, dir:"en", shuffle:false,
+  ci:0, flipped:false, order:[],
+  quiz:null
+};
+try{const t=localStorage.getItem(KEY+"_theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}
+
+/* ====================== HELPERS ====================== */
+const $=s=>document.querySelector(s);
+const app=$("#app");
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),1500);}
+function filtered(){
+  const q=S.q.trim().toLowerCase();
+  return WORDS.filter(w=>{
+    if(S.ch!=="all"&&w.ci!==+S.ch)return false;
+    if(S.sec!=="all"&&w.sec!==S.sec)return false;
+    const st=(P[w.id]||{}).s||0;
+    if(S.status==="new"&&st!==0)return false;
+    if(S.status==="1"&&st!==1)return false;
+    if(S.status==="2"&&st!==2)return false;
+    if(S.status==="3"&&st!==3)return false;
+    if(S.status==="todo"&&st===3)return false;
+    if(q&&!(w.en.toLowerCase().includes(q)||w.ja.includes(S.q.trim())||w.note.toLowerCase().includes(q)))return false;
+    return true;
+  });
+}
+function speak(t){
+  if(!window.speechSynthesis)return toast("この環境では読み上げできません");
+  const u=new SpeechSynthesisUtterance(t.replace(/\(.*?\)|\/.*$/g,"").trim()||t);
+  u.lang="en-US";u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+function counts(list){const c=[0,0,0,0];list.forEach(w=>c[(P[w.id]||{}).s||0]++);return c;}
+function meter(){
+  const c=counts(WORDS),t=WORDS.length;
+  $("#meter").innerHTML=[3,2,1].map(k=>`<i class="m${k}" style="width:${c[k]/t*100}%"></i>`).join("");
+}
+function shuffled(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ====================== SHARED CONTROLS ====================== */
+function controls(){
+  const secs=S.ch==="all"?[]:[...new Set(WORDS.filter(w=>w.ci===+S.ch).map(w=>w.sec))];
+  return `<div class="filters">
+    <div class="row">
+      <label class="search">🔍<input id="q" type="search" placeholder="英語・日本語・補足で検索" value="${esc(S.q)}"></label>
+      <select id="status">
+        <option value="all">状態：すべて</option>
+        <option value="todo">未修得のみ</option>
+        <option value="new">未学習</option>
+        <option value="1">苦手</option>
+        <option value="2">あいまい</option>
+        <option value="3">覚えた</option>
+      </select>
+    </div>
+    <div class="chips">
+      <button class="chip" data-ch="all" aria-pressed="${S.ch==="all"}">全章 ${WORDS.length}</button>
+      ${DATA.map((c,i)=>`<button class="chip" data-ch="${i}" aria-pressed="${S.ch===String(i)}">${c.c.replace("第","").replace("章 "," ")} ${WORDS.filter(w=>w.ci===i).length}</button>`).join("")}
+    </div>
+    ${secs.length?`<div class="row"><select id="sec" style="flex:1">
+      <option value="all">節：すべて</option>
+      ${secs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("")}
+    </select></div>`:""}
+  </div>`;
+}
+function reset(){S.ci=0;S.order=[];S.flipped=false;S.quiz=null;render();}
+function bindControls(){
+  const q=$("#q");
+  if(q)q.oninput=e=>{S.q=e.target.value;if(S.view==="list")renderListBody();else render();};
+  const st=$("#status");if(st){st.value=S.status;st.onchange=e=>{S.status=e.target.value;reset();};}
+  const sc=$("#sec");if(sc){sc.value=S.sec;sc.onchange=e=>{S.sec=e.target.value;reset();};}
+  document.querySelectorAll(".chip[data-ch]").forEach(b=>b.onclick=()=>{S.ch=b.dataset.ch;S.sec="all";reset();});
+}
+
+/* ====================== LIST ====================== */
+function itemHTML(w){
+  const r=P[w.id]||{s:0};
+  const lab=["未","苦手","あいまい","覚えた"][r.s]||"未";
+  const hasMemo=notes[w.id]&&notes[w.id].trim();
+  const memoOpen=expandedMemos.has(w.id);
+  let memoBlock="";
+  if(memoOpen){
+    memoBlock=`<div class="memo-box">
+      <label>📝 メモ <span class="memo-saved" data-memo-saved="${w.id}">保存しました</span></label>
+      <textarea data-memo-input="${w.id}" placeholder="覚え方やひっかけポイントなど">${esc(notes[w.id]||"")}</textarea>
+    </div>`;
+  }else if(hasMemo){
+    memoBlock=`<div class="memo-preview" data-memo-toggle="${w.id}">📝 ${esc(notes[w.id])}</div>`;
+  }
+  return `<li class="item" data-id="${w.id}">
+    <div class="toolsL">
+      <div class="no">${String(w.no).padStart(3,"0")}</div>
+      <button class="mark ${r.s?"s"+r.s:""}" data-cycle="${w.id}">${lab}</button>
+      <button class="mark" data-memo-toggle="${w.id}" style="margin-top:10px">${hasMemo?"📝 編集":"📝 メモ"}</button>
+    </div>
+    <div>
+      <div class="en">${w.custom?'<span class="badge-custom">自作</span>':''}${esc(w.en)}</div>
+      <div class="ja">${esc(w.ja)}</div>
+      ${w.note?`<div class="note">${esc(w.note)}</div>`:""}
+      ${memoBlock}
+    </div>
+    <div class="tools">
+      <button class="spk" data-spk aria-label="発音">🔊</button>
+      ${w.custom?`<button class="mark edit-btn" data-edit="${w.id}">✎編集</button>`:""}
+    </div>
+  </li>`;
+}
+function listBodyHTML(){
+  const list=filtered();
+  if(!list.length)return `<div class="empty">条件に合う語がありません。<br>検索語や絞り込みを変えてください。</div>`;
+  let out="",cur="";
+  list.forEach(w=>{
+    if(w.sec+w.ch!==cur){
+      if(cur)out+="</ol>";
+      cur=w.sec+w.ch;
+      const n=list.filter(x=>x.sec+x.ch===cur).length;
+      out+=`<div class="sec"><h2>${esc(w.ch)}／${esc(w.sec)}</h2><span></span><b>${n}語</b></div><ol class="list">`;
+    }
+    out+=itemHTML(w);
+  });
+  return out+"</ol>";
+}
+function renderListBody(){
+  const c=$("#listBody");if(!c)return;
+  c.innerHTML=listBodyHTML();
+  bindList();
+  $("#cnt").textContent=`${filtered().length} 語を表示中`;
+}
+function bindList(){
+  document.querySelectorAll("#listBody .item").forEach(li=>{
+    li.addEventListener("click",e=>{
+      const id=li.dataset.id;
+      const ed=e.target.closest("[data-edit]");
+      if(ed){openAddForm(ed.dataset.edit);return;}
+      const mt=e.target.closest("[data-memo-toggle]");
+      if(mt){ if(expandedMemos.has(id))expandedMemos.delete(id); else expandedMemos.add(id);
+        renderListBody(); return; }
+      const cy=e.target.closest("[data-cycle]");
+      if(cy){ const r=rec(id); r.s=(r.s+1)%4; save(); meter();
+        const lab=["未","苦手","あいまい","覚えた"][r.s];
+        cy.className="mark"+(r.s?" s"+r.s:""); cy.textContent=lab; return; }
+      if(e.target.closest("[data-spk]")){speak(WORDS.find(w=>w.id===id).en);return;}
+      if(S.sheet)li.classList.toggle("revealed");
+    });
+    const mi=li.querySelector("[data-memo-input]");
+    if(mi) mi.oninput=e=>scheduleSaveNote(mi.dataset.memoInput,e.target.value);
+  });
+}
+
+/* ====================== ADD / EDIT CUSTOM WORD ====================== */
+let editingWordId=null;
+function addWordFormHTML(edit){
+  const chOptions=DATA.map((c,i)=>`<option value="${i}" ${edit&&edit.ci===i?"selected":""}>${esc(c.c)}</option>`).join("");
+  return `<div class="add-modal">
+    <div class="add-head">
+      <div class="add-title">${edit?"単語を編集":"単語を追加"}</div>
+      <button id="addClose" class="iconbtn" title="閉じる">✕</button>
+    </div>
+    <div class="add-body">
+      <div class="flabel">章</div>
+      <select id="fCh">${chOptions}</select>
+      <div class="flabel">節（任意・空欄可）</div>
+      <input id="fSec" type="text" value="${edit?esc(edit.sec||""):""}" placeholder="例：自分で追加した単語">
+      <div class="flabel">英単語・英語表現</div>
+      <input id="fEn" type="text" value="${edit?esc(edit.en):""}" placeholder="例：impairment loss">
+      <div class="flabel">日本語の意味</div>
+      <input id="fJa" type="text" value="${edit?esc(edit.ja):""}" placeholder="例：減損損失">
+      <div class="flabel">補足（任意）</div>
+      <textarea id="fNote" rows="3" placeholder="関連語や覚え方など">${edit?esc(edit.note||""):""}</textarea>
+    </div>
+    <div class="add-foot">
+      ${edit?'<button id="fDelete" class="danger">削除</button>':"<span></span>"}
+      <button id="fSave" class="btn-main">保存</button>
+    </div>
+  </div>`;
+}
+function openAddForm(id){
+  editingWordId=id||null;
+  const edit=id?customWords.find(w=>w.id===id):null;
+  const ov=$("#addOverlay");
+  ov.innerHTML=addWordFormHTML(edit);
+  ov.style.display="flex";
+  $("#addClose").onclick=closeAddForm;
+  $("#fSave").onclick=saveAddForm;
+  const del=$("#fDelete");
+  if(del)del.onclick=()=>{
+    if(confirm("この単語を削除しますか？")){
+      customWords=customWords.filter(w=>w.id!==editingWordId);
+      saveCustomWords();rebuildWords();closeAddForm();render();
+      toast("削除しました");
+    }
+  };
+}
+function closeAddForm(){
+  const ov=$("#addOverlay");
+  ov.style.display="none";ov.innerHTML="";
+}
+function saveAddForm(){
+  const ci=parseInt($("#fCh").value);
+  const sec=$("#fSec").value.trim();
+  const en=$("#fEn").value.trim();
+  const ja=$("#fJa").value.trim();
+  const note=$("#fNote").value.trim();
+  if(!en||!ja){toast("英単語と日本語の意味を入力してください");return;}
+  if(editingWordId){
+    const w=customWords.find(x=>x.id===editingWordId);
+    Object.assign(w,{ci,sec,en,ja,note});
+  }else{
+    customWords.push({id:"custom-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),ci,sec,en,ja,note});
+  }
+  saveCustomWords();
+  rebuildWords();
+  closeAddForm();
+  render();
+  toast(editingWordId?"更新しました":"追加しました");
+}
+function viewList(){
+  app.innerHTML=controls()+`<div class="count" id="cnt"></div><div id="listBody"></div>
+  <div class="kbd">□□□ は周回チェック用。赤シート（右上の「赤」）を押すと意味と補足が隠れ，語をタップすると一時的に表示されます。</div>`;
+  bindControls();renderListBody();
+}
+
+/* ====================== CARD ====================== */
+function deck(){
+  const f=filtered();
+  return S.shuffle?(S.order.length===f.length?S.order:(S.order=shuffled(f))):f;
+}
+function viewCard(){
+  const d=deck();
+  if(!d.length){app.innerHTML=controls()+`<div class="empty">出題できる語がありません。</div>`;bindControls();return;}
+  if(S.ci>=d.length)S.ci=0;
+  const w=d[S.ci],r=P[w.id]||{s:0};
+  const front=S.dir==="en"?w.en:w.ja;
+  const backJa=S.dir==="en"?w.ja:w.en;
+  app.innerHTML=controls()+`
+  <div class="row" style="margin-top:2px">
+    <button class="chip" id="dir" aria-pressed="false">${S.dir==="en"?"英 → 日":"日 → 英"}</button>
+    <button class="chip" id="shf" aria-pressed="${S.shuffle}">シャッフル</button>
+    <button class="chip" id="spk2">🔊 発音</button>
+    <span style="flex:1"></span>
+    <span class="count" style="padding:0">${r.s?["","苦手","あいまい","覚えた"][r.s]:"未学習"}</span>
+  </div>
+  <div class="card" id="card">
+    <div class="tag">${esc(w.ch)}／${esc(w.sec)}</div>
+    <div class="idx">${S.ci+1} / ${d.length}</div>
+    <div class="front" style="${S.dir==="en"?"":"font-family:var(--sans);font-weight:700"}">${esc(front)}</div>
+    ${S.flipped?`<div class="back">
+        <div class="b-ja" style="${S.dir==="en"?"":"font-family:var(--serif);font-weight:400"}">${esc(backJa)}</div>
+        ${w.note?`<div class="b-note">${esc(w.note)}</div>`:""}
+      </div>`:`<div class="veil">タップして答えを表示</div>`}
+  </div>
+  ${S.flipped?`<div class="grade">
+    <button data-g="1" class="g1">✕<b>苦手</b></button>
+    <button data-g="2" class="g2">△<b>あいまい</b></button>
+    <button data-g="3" class="g3">○<b>覚えた</b></button>
+  </div>`:`<div class="navrow"><button class="btn-main" id="flip">答えを見る</button></div>`}
+  <div class="navrow">
+    <button id="prev">← 前へ</button>
+    <button id="next">次へ →</button>
+  </div>
+  <div class="kbd"><kbd>Space</kbd> めくる　<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 評価　<kbd>←</kbd><kbd>→</kbd> 移動</div>`;
+  bindControls();
+  $("#dir").onclick=()=>{S.dir=S.dir==="en"?"ja":"en";S.flipped=false;render();};
+  $("#shf").onclick=()=>{S.shuffle=!S.shuffle;S.order=[];S.ci=0;S.flipped=false;render();};
+  $("#spk2").onclick=()=>speak(w.en);
+  $("#card").onclick=()=>{S.flipped=!S.flipped;render();};
+  const fl=$("#flip");if(fl)fl.onclick=e=>{e.stopPropagation();S.flipped=true;render();};
+  $("#prev").onclick=()=>{S.ci=(S.ci-1+d.length)%d.length;S.flipped=false;render();};
+  $("#next").onclick=()=>{S.ci=(S.ci+1)%d.length;S.flipped=false;render();};
+  document.querySelectorAll(".grade button").forEach(b=>b.onclick=()=>grade(+b.dataset.g));
+}
+function grade(g){
+  const d=deck(),w=d[S.ci];if(!w)return;
+  rec(w.id).s=g;save();meter();
+  S.ci=(S.ci+1)%d.length;S.flipped=false;render();
+}
+
+/* ====================== QUIZ ====================== */
+function startQuiz(){
+  const pool=filtered();
+  if(pool.length<4){app.innerHTML=controls()+`<div class="empty">テストには4語以上必要です。絞り込みを緩めてください。</div>`;bindControls();return;}
+  const n=Math.min(10,pool.length);
+  const qs=shuffled(pool).slice(0,n).map(w=>({...w,_userAns:null,_opts:null}));
+  S.quiz={qs,i:0,pool};
+  render();
+}
+function viewQuiz(){
+  if(!S.quiz){
+    const pool=filtered();
+    app.innerHTML=controls()+`<div class="stat-card">
+      <div class="mini">絞り込んだ <b>${pool.length}</b> 語から最大10問を4択で出題します。<br>出題方向は「${S.dir==="en"?"英語 → 日本語":"日本語 → 英語"}」です。</div>
+      <div class="act">
+        <button id="dir3">出題方向を切り替える</button>
+        <button class="btn-main" id="go" style="border:1px solid var(--ink)">テストを始める</button>
+      </div></div>`;
+    bindControls();
+    $("#dir3").onclick=()=>{S.dir=S.dir==="en"?"ja":"en";render();};
+    $("#go").onclick=startQuiz;return;
+  }
+  const Q=S.quiz;
+  if(Q.i>=Q.qs.length){
+    const answered=Q.qs.filter(q=>q._userAns!==null);
+    const ok=answered.filter(q=>q._userAns===q.id).length;
+    const skipped=Q.qs.length-answered.length;
+    const pc=answered.length?Math.round(ok/answered.length*100):0;
+    app.innerHTML=`<div class="score">
+      <div class="big">${ok} <span style="font-size:22px;color:var(--ink-3)">/ ${answered.length}</span></div>
+      <div class="mini" style="margin-top:10px">正答率 ${pc}％${skipped?"　（未回答 "+skipped+"問）":""}</div>
+      <div class="act" style="justify-content:center">
+        <button id="navBack" style="border:1px solid var(--rule)">‹ 最後の問題に戻る</button>
+        <button class="btn-main" id="again" style="border:1px solid var(--ink)">もう一度</button>
+        <button id="toList">一覧に戻る</button>
+      </div></div>`;
+    $("#navBack").onclick=()=>{Q.i=Q.qs.length-1;render();};
+    $("#again").onclick=()=>{S.quiz=null;startQuiz();};
+    $("#toList").onclick=()=>{S.quiz=null;setView("list");};
+    return;
+  }
+  const w=Q.qs[Q.i];
+  if(!w._opts){
+    const same=WORDS.filter(x=>x.ci===w.ci&&x.id!==w.id&&x.ja!==w.ja);
+    const src=same.length>=3?same:WORDS.filter(x=>x.id!==w.id);
+    w._opts=shuffled([w,...shuffled(src).slice(0,3)]);
+  }
+  const key=S.dir==="en"?"ja":"en";
+  const hasMemo=notes[w.id]&&notes[w.id].trim();
+  app.innerHTML=`<div class="q-head"><span>第 ${Q.i+1} 問 / ${Q.qs.length}</span><span>${Q.qs.filter(q=>q._userAns!==null&&q._userAns===q.id).length} 問正解</span></div>
+  <div class="q-stem"><div class="qt ${S.dir==="en"?"":"jp"}">${esc(S.dir==="en"?w.en:w.ja)}</div></div>
+  <div class="opts">${w._opts.map((o,i)=>{
+    let cls="";
+    if(w._userAns!==null){ if(o.id===w.id)cls="correct"; else if(o.id===w._userAns)cls="wrong"; }
+    return `<button class="opt ${cls}" data-id="${o.id}" ${w._userAns!==null?"disabled":""}><em>${i+1}</em><span>${esc(o[key])}</span></button>`;
+  }).join("")}</div>
+  ${w._userAns!==null?`<div class="q-result">
+      <div class="r-ja">${esc(w.en)} — ${esc(w.ja)}</div>
+      ${w.note?`<div class="r-note">${esc(w.note)}</div>`:""}
+      <div class="r-note">${esc(w.ch)}／${esc(w.sec)}</div>
+    </div>
+    <div class="memo-box">
+      <label>📝 メモ <span class="memo-saved" data-memo-saved="${w.id}">保存しました</span></label>
+      <textarea data-memo-input="${w.id}" placeholder="覚え方やひっかけポイントなど">${esc(notes[w.id]||"")}</textarea>
+    </div>`:""}
+  <div class="navrow">
+    <button id="navPrev" ${Q.i===0?"disabled":""}>‹ 前の問題</button>
+    <button id="navNext">${Q.i===Q.qs.length-1?"結果を見る ›":"次の問題 ›"}</button>
+  </div>`;
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    if(w._userAns!==null)return;
+    w._userAns=b.dataset.id;
+    const right=w._userAns===w.id;
+    const r=rec(w.id);
+    r.s=right?(r.s===3?3:Math.max(r.s,2)):1;
+    save();meter();render();
+  });
+  const mi=$("[data-memo-input]");if(mi)mi.oninput=e=>scheduleSaveNote(w.id,e.target.value);
+  $("#navPrev").onclick=()=>{ if(Q.i>0){Q.i--;render();} };
+  $("#navNext").onclick=()=>{ Q.i++; render(); };
+}
+
+/* ====================== STATS ====================== */
+function viewStats(){
+  const rows=DATA.map((ch,i)=>{
+    const list=WORDS.filter(w=>w.ci===i),c=counts(list),t=list.length;
+    return `<div class="stat-row"><div class="nm">${esc(ch.c)}</div>
+      <div class="bar">${[3,2,1].map(k=>`<i class="m${k}" style="width:${c[k]/t*100}%;background:var(--${k===3?"ok":k===2?"warn":"red"})"></i>`).join("")}</div>
+      <div class="pc">${Math.round(c[3]/t*100)}%</div></div>`;
+  }).join("");
+  const c=counts(WORDS),t=WORDS.length;
+  app.innerHTML=`<div class="stat-card">
+    <div class="mini">覚えた <b>${c[3]}</b> ／ あいまい <b>${c[2]}</b> ／ 苦手 <b>${c[1]}</b> ／ 未学習 <b>${c[0]}</b>（全 ${t} 語）</div>
+    <div style="height:10px"></div>
+    ${rows}
+    <div class="legend"><span class="lg3">覚えた</span><span class="lg2">あいまい</span><span class="lg1">苦手</span><span class="lg0">未学習</span></div>
+  </div>
+  <div class="stat-card">
+    <div class="mini">📶 複数端末で自動的に同期する（Firebase・初回のみ設定）</div>
+    <div id="cloudSyncBox" style="margin-top:10px"></div>
+  </div>
+  <div class="stat-card">
+    <div class="mini">学習の記録はこの端末のブラウザだけに保存されます。上の自動同期を使わない場合は、「記録を表示」でテキストを画面に出し，コピーしてメモアプリ等に保管してください。</div>
+    <div class="act">
+      <button id="ex">記録を表示してコピーする</button>
+      <button id="im">記録を読み込む</button>
+      <button class="danger" id="rs">記録を消す</button>
+    </div>
+    <div id="exportFallback" style="display:none;margin-top:10px">
+      <div class="mini">下のテキストを全選択してコピーし，メモアプリ等に貼り付けて保管してください。復元するときは，保管しておいたテキストをこの欄に貼り付けて「このテキストから復元」を押します。</div>
+      <textarea id="exportText" rows="4" style="width:100%;margin-top:6px;font-size:11px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);padding:6px;border-radius:var(--radius)" onclick="this.select()"></textarea>
+      <div class="act">
+        <button id="copyText">コピー</button>
+        <button id="restoreText">このテキストから復元</button>
+      </div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="mini"><b>使い方</b><br>
+    ・赤シート：右上の「赤」で意味を隠し，語をタップで一時表示<br>
+    ・□□□：周回チェック。1周目・2周目・3周目に印を付ける<br>
+    ・カード：○△✕で評価すると「未修得のみ」で絞り込めます<br>
+    ・テスト：絞り込んだ範囲から4択で10問</div>
+  </div>`;
+  $("#ex").onclick=()=>{
+    showExportFallback(JSON.stringify(P));
+  };
+  function showExportFallback(dataStr){
+    const box=$("#exportFallback");
+    box.style.display="block";
+    box.querySelector("textarea").value=dataStr;
+    box.querySelector("textarea").select();
+    toast("下のテキストを全選択してコピーしてください");
+  }
+  $("#im").onclick=()=>{
+    const inp=document.createElement("input");inp.type="file";inp.accept="application/json";
+    inp.onchange=()=>{const f=inp.files[0];if(!f)return;const rd=new FileReader();
+      rd.onload=()=>{try{P=JSON.parse(rd.result);save();meter();render();toast("読み込みました");}
+      catch(e){toast("このファイルは読み込めません");}};rd.readAsText(f);};
+    inp.click();
+  };
+  $("#rs").onclick=()=>{if(confirm("すべての学習記録を消します。よろしいですか。")){P={};save();meter();render();toast("記録を消しました");}};
+  const cpBtn=$("#copyText");if(cpBtn)cpBtn.onclick=async()=>{
+    const ta=$("#exportText");ta.select();
+    try{await navigator.clipboard.writeText(ta.value);toast("コピーしました");}
+    catch(e){document.execCommand("copy");toast("コピーしました");}
+  };
+  const rsBtn=$("#restoreText");if(rsBtn)rsBtn.onclick=()=>{
+    try{P=JSON.parse($("#exportText").value);save();meter();render();toast("読み込みました");}
+    catch(e){toast("このテキストは読み込めません");}
+  };
+  renderSyncSettings();
+}
+
+/* ====================== ROUTER ====================== */
+function render(){
+  document.body.classList.toggle("hide",S.sheet&&S.view==="list");
+  ({list:viewList,card:viewCard,quiz:viewQuiz,stats:viewStats})[S.view]();
+  meter();
+}
+function setView(v){
+  S.view=v;S.flipped=false;
+  if(v!=="quiz")S.quiz=null;
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));
+  window.scrollTo(0,0);render();
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$("#btnSheet").onclick=()=>{S.sheet=!S.sheet;$("#btnSheet").setAttribute("aria-pressed",S.sheet);
+  render();
+  toast(S.sheet?"赤シートをかけました（一覧の意味が隠れます）":"赤シートを外しました");};
+$("#btnTheme").onclick=()=>{
+  const d=document.documentElement.dataset.theme==="dark"?"light":"dark";
+  document.documentElement.dataset.theme=d;
+  try{localStorage.setItem(KEY+"_theme",d)}catch(e){}
+};
+$("#btnAdd").onclick=()=>openAddForm(null);
+document.addEventListener("keydown",e=>{
+  if(e.target.matches("input,select,textarea"))return;
+  if(S.view==="card"){
+    if(e.key===" "){e.preventDefault();S.flipped=!S.flipped;render();}
+    if(e.key==="ArrowRight"){const d=deck();S.ci=(S.ci+1)%d.length;S.flipped=false;render();}
+    if(e.key==="ArrowLeft"){const d=deck();S.ci=(S.ci-1+d.length)%d.length;S.flipped=false;render();}
+    if("123".includes(e.key)&&S.flipped)grade(+e.key);
+  }
+  if(S.view==="quiz"&&S.quiz&&S.quiz.ans===null&&"1234".includes(e.key)){
+    const b=document.querySelectorAll(".opt")[+e.key-1];if(b)b.click();
+  }
+  if(S.view==="quiz"&&S.quiz&&S.quiz.ans!==null&&e.key==="Enter"){const n=$("#nextq");if(n)n.click();}
+});
+render();
+pullFromCloud(true);
+</script>
+</body>
+</html>

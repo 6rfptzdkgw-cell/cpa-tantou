@@ -125,7 +125,11 @@ li.item:last-child{border-bottom:none}
 .mark.warn{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
 .mark.ok{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
 
-.masked{position:relative;color:transparent!important;border-radius:2px;cursor:pointer}
+.navrow2{display:flex;gap:8px;margin-top:14px}
+.navrow2 button{flex:1;border:1px solid var(--rule);background:var(--panel);padding:12px;border-radius:var(--radius);font-size:14px}
+.navrow2 button:disabled{opacity:.35;cursor:default}
+.memo-preview{cursor:pointer;border-left-color:var(--blue)!important}
+
 .masked::before{content:"";position:absolute;left:0;right:0;top:0;bottom:0;background:var(--sheet);opacity:.92;border-radius:3px}
 .sheet-on li.item{cursor:pointer}
 
@@ -200,6 +204,7 @@ footer{text-align:center;font-size:11px;color:var(--ink-3);padding:26px 0 34px}
 .badge-custom{display:inline-block;font-size:10px;background:var(--blue);color:#fff;padding:1px 6px;border-radius:99px;margin-right:6px;vertical-align:middle}
 .edit-btn{margin-top:6px;font-size:10px}
 .stat-card input{width:100%;border:1px solid var(--rule);background:var(--paper);color:var(--ink);padding:9px 10px;border-radius:var(--radius);font-size:13px;margin-top:4px}
+.tools button[data-memo-toggle]{margin-top:10px}
 </style>
 </head>
 <body>
@@ -323,8 +328,9 @@ function scheduleSaveNote(id,text){
   noteSaveTimer=setTimeout(()=>{
     if(HAS_LS){ try{ localStorage.setItem(LS_NOTES_KEY,JSON.stringify(notes)); }catch(e){} }
     touchUpdated();
-    const el=document.getElementById('memo-saved-indicator');
-    if(el){ el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200); }
+    document.querySelectorAll('[data-memo-saved="'+id+'"]').forEach(el=>{
+      el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200);
+    });
   },500);
 }
 
@@ -594,23 +600,35 @@ function bindControls(){
 }
 
 /* ---------- LIST VIEW ---------- */
+let expandedMemos=new Set();
 function statusLabel(s){ return ['未','ダメ','覚えた'][s]||'未'; }
 function itemHTML(w){
   const s=status[w.id]||0;
   const hasMemo = notes[w.id] && notes[w.id].trim();
-  let noteText = (w.citation? w.citation+'　':'') + (w.explanation||'');
-  if(hasMemo) noteText += '\n📝 '+notes[w.id];
+  const noteText = (w.citation? w.citation+'　':'') + (w.explanation||'');
   const masked = S.sheet && !S.revealed.has(w.id);
+  const memoOpen = expandedMemos.has(w.id);
+  let memoBlock='';
+  if(memoOpen){
+    memoBlock=`<div class="memo-box">
+      <label>📝 メモ <span class="memo-saved" data-memo-saved="${w.id}">保存しました</span></label>
+      <textarea data-memo-input="${w.id}" placeholder="覚え方やひっかけポイントなど">${esc(notes[w.id]||'')}</textarea>
+    </div>`;
+  } else if(hasMemo){
+    memoBlock=`<div class="note memo-preview ${masked?'masked':''}" data-memo-toggle="${w.id}">📝 ${esc(notes[w.id])}</div>`;
+  }
   return `<li class="item" data-id="${w.id}">
     <div class="tools">
       <div class="no">${w.refs? esc(w.refs):''}</div>
       <button class="mark ${markClass(s)}" data-cycle="${w.id}">${statusLabel(s)}</button>
       ${w.custom?`<button class="mark edit-btn" data-edit="${w.id}">✎編集</button>`:''}
+      <button class="mark" data-memo-toggle="${w.id}">${hasMemo?'📝 編集':'📝 メモ'}</button>
     </div>
     <div>
       <div class="en">${w.custom?'<span class="badge-custom">自作</span>':''}${esc(w.statement)}</div>
       <div class="ja ${masked?'masked':''}">正解：${w.answer?'○（正しい）':'✕（誤り）'}</div>
       <div class="note ${masked?'masked':''}">${esc(noteText)}</div>
+      ${memoBlock}
     </div>
   </li>`;
 }
@@ -644,6 +662,10 @@ function bindListBody(){
       const id=li.dataset.id;
       const ed=e.target.closest('[data-edit]');
       if(ed){ e.stopPropagation(); openAddForm(ed.dataset.edit); return; }
+      const mt=e.target.closest('[data-memo-toggle]');
+      if(mt){ e.stopPropagation();
+        if(expandedMemos.has(id)) expandedMemos.delete(id); else expandedMemos.add(id);
+        renderListBody(); return; }
       const cy=e.target.closest('[data-cycle]');
       if(cy){ e.stopPropagation(); const v=cycleStatus(id); meter();
         cy.className='mark '+markClass(v); cy.textContent=statusLabel(v); return; }
@@ -654,6 +676,8 @@ function bindListBody(){
       ja.classList.toggle('masked', nowMasked);
       note.classList.toggle('masked', nowMasked);
     });
+    const mi=li.querySelector('[data-memo-input]');
+    if(mi) mi.oninput=e=>scheduleSaveNote(mi.dataset.memoInput,e.target.value);
   });
 }
 function viewList(){
@@ -761,7 +785,8 @@ function startQuiz(){
     const n=parseInt(S.quizCount);
     if(n>0 && n<qs.length) qs=qs.slice(0,n);
   }
-  S.quiz={ qs, i:0, ans:null, ok:0, missed:[] };
+  qs = qs.map(q=>({...q, _userAns:null}));
+  S.quiz={ qs, i:0 };
   render();
 }
 function viewQuiz(){
@@ -788,32 +813,38 @@ function viewQuiz(){
   }
   const Q=S.quiz;
   if(Q.i>=Q.qs.length){
-    const pc=Q.qs.length? Math.round(Q.ok/Q.qs.length*100):0;
+    const answered=Q.qs.filter(q=>q._userAns!==null);
+    const ok=answered.filter(q=>q._userAns===q.answer).length;
+    const missed=answered.filter(q=>q._userAns!==q.answer);
+    const skipped=Q.qs.length-answered.length;
+    const pc=answered.length? Math.round(ok/answered.length*100):0;
     app.innerHTML=`<div class="score">
-      <div class="big">${Q.ok} <span style="font-size:22px;color:var(--ink-3)">/ ${Q.qs.length}</span></div>
-      <div class="mini" style="margin-top:10px">正答率 ${pc}％</div>
+      <div class="big">${ok} <span style="font-size:22px;color:var(--ink-3)">/ ${answered.length}</span></div>
+      <div class="mini" style="margin-top:10px">正答率 ${pc}％${skipped?'　（未回答 '+skipped+'問）':''}</div>
       <div class="act" style="justify-content:center">
+        <button id="navBack" style="border:1px solid var(--rule)">‹ 最後の問題に戻る</button>
         <button class="btn-main" id="again" style="border:1px solid var(--ink)">もう一度</button>
         <button id="toList">一覧に戻る</button>
       </div></div>
-      ${Q.missed.length? `<div class="sec"><h2>間違えた問題（${Q.missed.length}問）</h2><span></span></div>
-      <ol class="list">${Q.missed.map(m=>`<li class="item" style="grid-template-columns:1fr">
+      ${missed.length? `<div class="sec"><h2>間違えた問題（${missed.length}問）</h2><span></span></div>
+      <ol class="list">${missed.map(m=>`<li class="item" style="grid-template-columns:1fr">
         <div><div class="en">${esc(m.statement)}</div>
         <div class="ja">正解：${m.answer?'○（正しい）':'✕（誤り）'}</div>
         <div class="note">${esc((m.citation?m.citation+'　':'')+m.explanation)}</div></div></li>`).join('')}</ol>`:''}`;
+    $('#navBack').onclick=()=>{ Q.i=Q.qs.length-1; render(); };
     $('#again').onclick=()=>{ S.quiz=null; startQuiz(); };
     $('#toList').onclick=()=>{ S.quiz=null; setView('list'); };
     return;
   }
   const w=Q.qs[Q.i];
   let bottom='';
-  if(Q.ans===null){
+  if(w._userAns===null){
     bottom=`<div class="oxbtns">
       <button class="oxbtn maru" id="bm">○</button>
       <button class="oxbtn batsu" id="bx">✕</button>
     </div>`;
   } else {
-    const correct = Q.ans===w.answer;
+    const correct = w._userAns===w.answer;
     bottom=`<div class="result-banner ${correct?'ok':'ng'}">
         <div class="rmark">${w.answer?'○':'✕'}</div>
         <div class="rtxt">${correct?'正解！':'不正解'}　正解は「${w.answer?'○（正しい）':'✕（誤り）'}」</div>
@@ -823,8 +854,8 @@ function viewQuiz(){
         <div class="r-note">${esc(w.explanation)||'（解説なし）'}</div>
       </div>
       <div class="memo-box">
-        <label>📝 メモ <span class="memo-saved" id="memo-saved-indicator">保存しました</span></label>
-        <textarea id="memoInput" placeholder="覚え方やひっかけポイントなど">${esc(notes[w.id]||'')}</textarea>
+        <label>📝 メモ <span class="memo-saved" data-memo-saved="${w.id}">保存しました</span></label>
+        <textarea data-memo-input="${w.id}" placeholder="覚え方やひっかけポイントなど">${esc(notes[w.id]||'')}</textarea>
       </div>
       <div class="grade">
         <button class="g2" data-g="1">✕<b>ダメ</b></button>
@@ -835,26 +866,31 @@ function viewQuiz(){
     <div class="q-head"><span>第${w.chNum}章 ${w.chName}${w.major?'／'+w.major:''}</span><span>${Q.i+1} / ${Q.qs.length}</span></div>
     <div class="q-stem"><div class="qt">${esc(w.statement)}</div>${w.refs?`<div class="refs">${esc(w.refs)}</div>`:''}</div>
     ${bottom}
+    <div class="navrow2">
+      <button id="navPrev" ${Q.i===0?'disabled':''}>‹ 前の問題</button>
+      <button id="navNext">${Q.i===Q.qs.length-1?'結果を見る ›':'次の問題 ›'}</button>
+    </div>
   `;
-  if(Q.ans===null){
+  if(w._userAns===null){
     $('#bm').onclick=()=>submitAnswer(true);
     $('#bx').onclick=()=>submitAnswer(false);
   } else {
-    const mi=$('#memoInput'); if(mi) mi.oninput=e=>scheduleSaveNote(w.id,e.target.value);
+    const mi=$('[data-memo-input]'); if(mi) mi.oninput=e=>scheduleSaveNote(w.id,e.target.value);
     document.querySelectorAll('.grade button').forEach(b=>b.onclick=()=>{
       setStatus(w.id,+b.dataset.g); meter(); nextQuestion();
     });
   }
+  $('#navPrev').onclick=()=>{ if(Q.i>0){ Q.i--; render(); } };
+  $('#navNext').onclick=()=>{ Q.i++; render(); };
 }
 function submitAnswer(userAns){
   const Q=S.quiz, w=Q.qs[Q.i];
-  Q.ans=userAns;
-  if(userAns===w.answer) Q.ok++; else Q.missed.push(w);
+  w._userAns=userAns;
   render();
 }
 function nextQuestion(){
   const Q=S.quiz;
-  Q.i++; Q.ans=null;
+  Q.i++;
   render();
 }
 
