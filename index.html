@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="light">
+<html lang="ja" data-theme="dark">
 <head>
 <meta charset="utf-8">
+<script>try{var __t=localStorage.getItem('theme_v1'); if(__t) document.documentElement.dataset.theme=__t;}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -101,7 +102,9 @@ footer{text-align:center;font-size:11px;color:var(--ink-3);padding:34px 0}
 </div>
 <script>
 document.getElementById('btnTheme').onclick=()=>{
-  document.documentElement.dataset.theme = document.documentElement.dataset.theme==='dark' ? 'light':'dark';
+  const d = document.documentElement.dataset.theme==='dark' ? 'light':'dark';
+  document.documentElement.dataset.theme = d;
+  try{ localStorage.setItem('theme_v1', d); }catch(e){}
 };
 </script>
 </body>

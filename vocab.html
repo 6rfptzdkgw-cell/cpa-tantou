@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="light">
+<html lang="ja" data-theme="dark">
 <head>
 <meta charset="utf-8">
+<script>try{var __t=localStorage.getItem('theme_v1'); if(__t) document.documentElement.dataset.theme=__t;}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1193,7 +1194,7 @@ const S={
   ci:0, flipped:false, order:[],
   quiz:null
 };
-try{const t=localStorage.getItem(KEY+"_theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}
+
 
 /* ====================== HELPERS ====================== */
 const $=s=>document.querySelector(s);
@@ -1637,7 +1638,7 @@ $("#btnSheet").onclick=()=>{S.sheet=!S.sheet;$("#btnSheet").setAttribute("aria-p
 $("#btnTheme").onclick=()=>{
   const d=document.documentElement.dataset.theme==="dark"?"light":"dark";
   document.documentElement.dataset.theme=d;
-  try{localStorage.setItem(KEY+"_theme",d)}catch(e){}
+  try{localStorage.setItem("theme_v1",d)}catch(e){}
 };
 $("#btnAdd").onclick=()=>openAddForm(null);
 document.addEventListener("keydown",e=>{
