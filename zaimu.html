@@ -219,6 +219,10 @@ footer{text-align:center;font-size:11px;color:var(--ink-3);padding:26px 0 34px}
 .add-foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:8px}
 .add-foot .danger{color:var(--red);border:1px solid var(--red);background:none;padding:10px 14px;border-radius:var(--radius);font-size:13px}
 .badge-custom{display:inline-block;font-size:10px;background:var(--blue);color:#fff;padding:1px 6px;border-radius:99px;margin-right:6px;vertical-align:middle}
+.lease-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;margin-right:8px;vertical-align:middle}
+.lease-badge.new{background:var(--blue);color:#fff}
+.lease-badge.old{background:var(--warn);color:#fff}
+.q-stem .lease-badge{display:inline-block;margin-bottom:10px}
 .edit-btn{margin-top:6px;font-size:10px}
 .stat-card input{width:100%;border:1px solid var(--rule);background:var(--paper);color:var(--ink);padding:9px 10px;border-radius:var(--radius);font-size:13px;margin-top:4px}
 .navrow2{display:flex;gap:8px;margin-top:14px}
@@ -667,13 +671,18 @@ function itemHTML(w){
       <button class="mark" data-memo-toggle="${w.id}">${hasMemo?'📝 編集':'📝 メモ'}</button>
     </div>
     <div>
-      <div class="en">${w.custom?'<span class="badge-custom">自作</span>':''}${esc(w.statement)}</div>
+      <div class="en">${leaseBadgeHTML(w)}${w.custom?'<span class="badge-custom">自作</span>':''}${esc(w.statement)}</div>
       <div class="ja">正解：${w.answer?'○（正しい）':'✕（誤り）'}</div>
       <div class="note">${esc(noteText)}</div>
       ${memoBlock}
     </div>
     <div class="tools"></div>
   </li>`;
+}
+function leaseBadgeHTML(w){
+  if(w.chNum!==17) return '';
+  const isNew = String(w.label).charAt(0)==='N';
+  return `<span class="lease-badge ${isNew?'new':'old'}">${isNew?'新基準':'現行基準'}</span>`;
 }
 function listBodyHTML(){
   const list=listFiltered();
@@ -906,7 +915,7 @@ function viewQuiz(){
   }
   app.innerHTML=`
     <div class="q-head"><span>第${w.chNum}章 ${w.chName}${w.major?'／'+w.major:''}</span><span>${Q.i+1} / ${Q.qs.length}</span></div>
-    <div class="q-stem"><div class="qt">${esc(w.statement)}</div>${w.refs?`<div class="refs">${esc(w.refs)}</div>`:''}</div>
+    <div class="q-stem">${leaseBadgeHTML(w)}<div class="qt">${esc(w.statement)}</div>${w.refs?`<div class="refs">${esc(w.refs)}</div>`:''}</div>
     ${bottom}
     <div class="navrow2">
       <button id="navPrev" ${Q.i===0?'disabled':''}>‹ 前の問題</button>
