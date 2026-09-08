@@ -226,6 +226,9 @@ footer{text-align:center;font-size:11px;color:var(--ink-3);padding:26px 0 34px}
 .navrow2 button:disabled{opacity:.35;cursor:default}
 .memo-preview{cursor:pointer;border-left-color:var(--blue)!important}
 .tools button[data-memo-toggle]{margin-top:10px}
+mark.hl{background:#FFF176;color:#1B2229;padding:0 1px;border-radius:2px;cursor:pointer}
+[data-theme="dark"] mark.hl{background:#8a7a1f;color:#F4F5F1}
+.hl-popup{position:absolute;z-index:200;background:var(--ink);color:var(--paper);border:none;padding:9px 14px;border-radius:20px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -301,8 +304,10 @@ const LS_STATUS_KEY='kigyoho_status_v1';
 const LS_NOTES_KEY='kigyoho_notes_v1';
 const LS_CUSTOM_KEY='kigyoho_custom_v1';
 const LS_UPDATED_KEY='kigyoho_updated_v1';
+const LS_HL_KEY='kigyoho_highlights_v1';
 const SYNC_URL_KEY='qsync_dburl_v1';
 const SYNC_CODE_KEY='qsync_code_v1';
+let highlights={}; // id -> [[start,end], ...] ranges within explanation text
 
 function storageAvailable(){
   try{
@@ -327,11 +332,20 @@ async function loadStorage(){
       if(c) customQs=JSON.parse(c);
     }catch(e){ customQs=[]; }
     try{
+      const h=localStorage.getItem(LS_HL_KEY);
+      if(h) highlights=JSON.parse(h);
+    }catch(e){ highlights={}; }
+    try{
       const u=localStorage.getItem(LS_UPDATED_KEY);
       localUpdatedAt = u? (parseInt(u,10)||0) : 0;
     }catch(e){ localUpdatedAt=0; }
   }
   rebuildIndexes();
+}
+function saveHighlights(){
+  if(!HAS_LS) return;
+  try{ localStorage.setItem(LS_HL_KEY,JSON.stringify(highlights)); }catch(e){}
+  touchUpdated();
 }
 async function saveStatus(){
   if(!HAS_LS) return;
@@ -383,7 +397,7 @@ async function pushToCloud(cfg){
     await fetch(cloudPath(cfg), {
       method:'PUT',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({status,notes,customQs,updatedAt:localUpdatedAt})
+      body: JSON.stringify({status,notes,customQs,highlights,updatedAt:localUpdatedAt})
     });
     return true;
   }catch(e){ return false; }
@@ -398,12 +412,14 @@ async function pullFromCloud(showToast){
     status=data.status||{};
     notes=data.notes||{};
     customQs=data.customQs||[];
+    highlights=data.highlights||{};
     localUpdatedAt=data.updatedAt||0;
     if(HAS_LS){
       try{
         localStorage.setItem(LS_STATUS_KEY,JSON.stringify(status));
         localStorage.setItem(LS_NOTES_KEY,JSON.stringify(notes));
         localStorage.setItem(LS_CUSTOM_KEY,JSON.stringify(customQs));
+        localStorage.setItem(LS_HL_KEY,JSON.stringify(highlights));
         localStorage.setItem(LS_UPDATED_KEY,String(localUpdatedAt));
       }catch(e){}
     }
@@ -532,6 +548,92 @@ try{ const t=localStorage; }catch(e){}
 const $=s=>document.querySelector(s);
 const app=$('#app');
 function esc(s){ if(!s) return ''; return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------- HIGHLIGHT MARKER (explanation text only) ---------- */
+function highlightedHTML(id, text){
+  text = text||'';
+  const ranges=(highlights[id]||[]).slice().sort((a,b)=>a[0]-b[0]);
+  let out='', pos=0;
+  ranges.forEach(([s,e])=>{
+    s=Math.max(0,Math.min(s,text.length)); e=Math.max(0,Math.min(e,text.length));
+    if(e<=s || s<pos) return;
+    if(s>pos) out+=esc(text.slice(pos,s));
+    out+=`<mark class="hl" data-hl-range="${s}:${e}">${esc(text.slice(s,e))}</mark>`;
+    pos=e;
+  });
+  if(pos<text.length) out+=esc(text.slice(pos));
+  return out;
+}
+function addHighlight(id,s,e){
+  const arr=(highlights[id]||[]).concat([[s,e]]).sort((a,b)=>a[0]-b[0]);
+  const merged=[];
+  arr.forEach(r=>{
+    if(merged.length && r[0]<=merged[merged.length-1][1]) merged[merged.length-1][1]=Math.max(merged[merged.length-1][1],r[1]);
+    else merged.push(r.slice());
+  });
+  highlights[id]=merged;
+  saveHighlights();
+  render();
+}
+function removeHighlight(id,s,e){
+  highlights[id]=(highlights[id]||[]).filter(r=>!(r[0]===s&&r[1]===e));
+  if(!highlights[id].length) delete highlights[id];
+  saveHighlights();
+  render();
+}
+function hlTextOffset(container,node,offset){
+  let total=0;
+  const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT,null);
+  let n;
+  while((n=walker.nextNode())){
+    if(n===node) return total+offset;
+    total+=n.textContent.length;
+  }
+  return total;
+}
+let hlPopupEl=null;
+function hlPopup(){
+  if(hlPopupEl) return hlPopupEl;
+  hlPopupEl=document.createElement('button');
+  hlPopupEl.className='hl-popup';
+  hlPopupEl.textContent='🖍 マーカー';
+  hlPopupEl.style.display='none';
+  document.body.appendChild(hlPopupEl);
+  return hlPopupEl;
+}
+function hlOnSelectionChange(){
+  const popup=hlPopup();
+  const sel=window.getSelection();
+  if(!sel||sel.rangeCount===0||sel.isCollapsed){ popup.style.display='none'; return; }
+  const range=sel.getRangeAt(0);
+  const anchorEl = range.commonAncestorContainer.nodeType===1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
+  const container = anchorEl? anchorEl.closest('[data-hl-id]') : null;
+  if(!container){ popup.style.display='none'; return; }
+  const start=hlTextOffset(container,range.startContainer,range.startOffset);
+  const end=hlTextOffset(container,range.endContainer,range.endOffset);
+  if(start===end){ popup.style.display='none'; return; }
+  const s=Math.min(start,end), e=Math.max(start,end);
+  const rect=range.getBoundingClientRect();
+  popup.style.display='block';
+  popup.style.left=Math.max(6,rect.left+rect.width/2-42)+'px';
+  popup.style.top=Math.max(6,window.scrollY+rect.top-42)+'px';
+  popup.onclick=()=>{
+    addHighlight(container.dataset.hlId,s,e);
+    sel.removeAllRanges();
+    popup.style.display='none';
+  };
+}
+document.addEventListener('selectionchange', hlOnSelectionChange);
+document.addEventListener('scroll', ()=>{ if(hlPopupEl) hlPopupEl.style.display='none'; }, true);
+document.addEventListener('click', e=>{
+  const m=e.target.closest('mark.hl');
+  if(!m) return;
+  const container=m.closest('[data-hl-id]');
+  if(!container) return;
+  const parts=m.dataset.hlRange.split(':').map(Number);
+  const s=parts[0], e2=parts[1];
+  if(confirm('このマーカーを消しますか？')) removeHighlight(container.dataset.hlId,s,e2);
+});
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'),1500); }
 function shuffled(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
@@ -648,7 +750,7 @@ let expandedMemos=new Set();
 function itemHTML(w){
   const s=status[w.id]||0;
   const hasMemo = notes[w.id] && notes[w.id].trim();
-  const noteText = (w.citation? w.citation+'　':'') + (w.explanation||'');
+
   const memoOpen = expandedMemos.has(w.id);
   let memoBlock='';
   if(memoOpen){
@@ -669,7 +771,7 @@ function itemHTML(w){
     <div>
       <div class="en">${w.custom?'<span class="badge-custom">自作</span>':''}${esc(w.statement)}</div>
       <div class="ja">正解：${w.answer?'○（正しい）':'✕（誤り）'}</div>
-      <div class="note">${esc(noteText)}</div>
+      <div class="note" data-hl-id="${w.id}">${w.citation?esc(w.citation)+'　':''}${highlightedHTML(w.id, w.explanation)}</div>
       ${memoBlock}
     </div>
     <div class="tools"></div>
@@ -893,7 +995,7 @@ function viewQuiz(){
       </div>
       <div class="q-result">
         ${w.citation?`<div class="r-cite">${esc(w.citation)}</div>`:''}
-        <div class="r-note">${esc(w.explanation)||'（解説なし）'}</div>
+        <div class="r-note" data-hl-id="${w.id}">${highlightedHTML(w.id, w.explanation) || '（解説なし）'}</div>
       </div>
       <div class="memo-box">
         <label>📝 メモ <span class="memo-saved" data-memo-saved="${w.id}">保存しました</span></label>
