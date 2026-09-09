@@ -51,10 +51,15 @@ header{padding:28px 0 10px;text-align:center}
 .brand small{display:block;font-family:var(--sans);font-size:11px;color:var(--ink-3);letter-spacing:.12em;margin-top:6px}
 .cards{margin-top:22px;display:flex;flex-direction:column;gap:14px}
 a.card{
-  display:block;background:var(--panel);border:1px solid var(--rule);border-radius:var(--radius);
+  display:block;background:var(--panel);border:1px solid var(--rule);border-left-width:4px;border-radius:var(--radius);
   padding:18px 18px;text-decoration:none;color:inherit;position:relative;
   transition:transform .12s ease, box-shadow .12s ease;
 }
+a.card.subj-zaimu{border-left-color:#2F6FBF}
+a.card.subj-kanri{border-left-color:#E08A2E}
+a.card.subj-kigyo{border-left-color:#D9B21A}
+a.card.subj-kansa{border-left-color:#4FB8D0}
+a.card.subj-vocab{border-left-color:#C43F7A}
 a.card:active{transform:scale(.98)}
 a.card .subj{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--ink)}
 a.card .meta{font-size:12.5px;color:var(--ink-3);margin-top:6px}
@@ -71,27 +76,27 @@ footer{text-align:center;font-size:11px;color:var(--ink-3);padding:34px 0}
     <div class="brand">短答対策 過去問チェック<small>公認会計士試験｜科目を選んでください</small></div>
   </header>
   <div class="cards">
-    <a class="card" href="./zaimu.html">
+    <a class="card subj-zaimu" href="./zaimu.html">
       <div class="subj">財務会計論（理論）</div>
       <div class="meta">全26章・1109問</div>
       <div class="arrow">›</div>
     </a>
-    <a class="card" href="./kanrikaikei.html">
+    <a class="card subj-kanri" href="./kanrikaikei.html">
       <div class="subj">管理会計論</div>
-      <div class="meta">全16章・804問（過去問チェック）</div>
+      <div class="meta">全16章・804問</div>
       <div class="arrow">›</div>
     </a>
-    <a class="card" href="./kigyoho.html">
+    <a class="card subj-kigyo" href="./kigyoho.html">
       <div class="subj">企業法</div>
       <div class="meta">全15章・2313問</div>
       <div class="arrow">›</div>
     </a>
-    <a class="card" href="./kansa.html">
+    <a class="card subj-kansa" href="./kansa.html">
       <div class="subj">監査論</div>
       <div class="meta">全11章・1580問</div>
       <div class="arrow">›</div>
     </a>
-    <a class="card" href="./vocab.html">
+    <a class="card subj-vocab" href="./vocab.html">
       <div class="subj">英単語帳</div>
       <div class="meta">全664語（短答対策）</div>
       <div class="arrow">›</div>

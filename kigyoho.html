@@ -228,6 +228,9 @@ footer{text-align:center;font-size:11px;color:var(--ink-3);padding:26px 0 34px}
 .tools button[data-memo-toggle]{margin-top:10px}
 mark.hl{background:#FFF176;color:#1B2229;padding:0 1px;border-radius:2px;cursor:pointer}
 [data-theme="dark"] mark.hl{background:#8a7a1f;color:#F4F5F1}
+.hide .note mark.hl{background:transparent!important;color:transparent!important}
+.hide .revealed .note mark.hl{background:#FFF176!important;color:#1B2229!important}
+[data-theme="dark"] .hide .revealed .note mark.hl{background:#8a7a1f!important;color:#F4F5F1!important}
 .hl-popup{position:absolute;z-index:200;background:var(--ink);color:var(--paper);border:none;padding:9px 14px;border-radius:20px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.35);white-space:nowrap}
 </style>
 </head>
@@ -238,6 +241,7 @@ mark.hl{background:#FFF176;color:#1B2229;padding:0 1px;border-radius:2px;cursor:
       <div class="brand">企業法 短答対策問題集<small>公認会計士試験</small></div>
       <div class="hd-sp"></div>
       <button class="iconbtn" id="btnAdd" title="問題を追加">＋</button>
+      <button class="iconbtn" id="btnFixMode" aria-pressed="false" title="誤字修正モード">✎</button>
       <button class="iconbtn" id="btnSheet" aria-pressed="false" title="赤シート（答えを隠す）">赤</button>
       <button class="iconbtn" id="btnTheme" title="表示切替">◐</button>
     </div>
@@ -265,11 +269,17 @@ function rebuildIndexes(){
   ALL_Q=[];
   CHAPTERS.forEach((ch,ci)=>{
     ch.qs.forEach((q,qi)=>{
+      const id = ci+'_'+qi;
+      const fx = fixes[id];
       ALL_Q.push({
-        id: ci+'_'+qi, chNum: ch.n, chName: ch.name,
+        id, chNum: ch.n, chName: ch.name,
         major: q.m||'', sub: q.sb||'', importance: q.i||'',
-        label: q.l, refs: q.r||'', statement: q.q, answer: q.a,
-        citation: q.c||'', explanation: q.e||'', custom:false
+        label: q.l, refs: q.r||'',
+        statement: fx&&fx.q!==undefined ? fx.q : q.q,
+        answer: fx&&fx.a!==undefined ? fx.a : q.a,
+        citation: fx&&fx.c!==undefined ? fx.c : (q.c||''),
+        explanation: fx&&fx.e!==undefined ? fx.e : (q.e||''),
+        custom:false, fixed: !!fx
       });
     });
   });
@@ -305,9 +315,11 @@ const LS_NOTES_KEY='kigyoho_notes_v1';
 const LS_CUSTOM_KEY='kigyoho_custom_v1';
 const LS_UPDATED_KEY='kigyoho_updated_v1';
 const LS_HL_KEY='kigyoho_highlights_v1';
+const LS_FIX_KEY='kigyoho_fixes_v1';
 const SYNC_URL_KEY='qsync_dburl_v1';
 const SYNC_CODE_KEY='qsync_code_v1';
 let highlights={}; // id -> [[start,end], ...] ranges within explanation text
+let fixes={}; // id -> {q,a,c,e} overrides for built-in questions
 
 function storageAvailable(){
   try{
@@ -336,6 +348,10 @@ async function loadStorage(){
       if(h) highlights=JSON.parse(h);
     }catch(e){ highlights={}; }
     try{
+      const f=localStorage.getItem(LS_FIX_KEY);
+      if(f) fixes=JSON.parse(f);
+    }catch(e){ fixes={}; }
+    try{
       const u=localStorage.getItem(LS_UPDATED_KEY);
       localUpdatedAt = u? (parseInt(u,10)||0) : 0;
     }catch(e){ localUpdatedAt=0; }
@@ -345,6 +361,11 @@ async function loadStorage(){
 function saveHighlights(){
   if(!HAS_LS) return;
   try{ localStorage.setItem(LS_HL_KEY,JSON.stringify(highlights)); }catch(e){}
+  touchUpdated();
+}
+function saveFixes(){
+  if(!HAS_LS) return;
+  try{ localStorage.setItem(LS_FIX_KEY,JSON.stringify(fixes)); }catch(e){}
   touchUpdated();
 }
 async function saveStatus(){
@@ -397,7 +418,7 @@ async function pushToCloud(cfg){
     await fetch(cloudPath(cfg), {
       method:'PUT',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({status,notes,customQs,highlights,updatedAt:localUpdatedAt})
+      body: JSON.stringify({status,notes,customQs,highlights,fixes,updatedAt:localUpdatedAt})
     });
     return true;
   }catch(e){ return false; }
@@ -413,6 +434,7 @@ async function pullFromCloud(showToast){
     notes=data.notes||{};
     customQs=data.customQs||[];
     highlights=data.highlights||{};
+    fixes=data.fixes||{};
     localUpdatedAt=data.updatedAt||0;
     if(HAS_LS){
       try{
@@ -420,6 +442,7 @@ async function pullFromCloud(showToast){
         localStorage.setItem(LS_NOTES_KEY,JSON.stringify(notes));
         localStorage.setItem(LS_CUSTOM_KEY,JSON.stringify(customQs));
         localStorage.setItem(LS_HL_KEY,JSON.stringify(highlights));
+        localStorage.setItem(LS_FIX_KEY,JSON.stringify(fixes));
         localStorage.setItem(LS_UPDATED_KEY,String(localUpdatedAt));
       }catch(e){}
     }
@@ -539,6 +562,7 @@ const S={
   excludedMajors:new Set(),
   expandedChapters:new Set(),
   sheet:false,
+  editMode:false,
   shuffle:true,
   quizCount:'all',
   quiz:null
@@ -766,10 +790,11 @@ function itemHTML(w){
       <div class="no">${String(w.label!==undefined?w.label:'')}</div>
       <button class="mark ${markClass(s)}" data-cycle="${w.id}">${statusLabel(s)}</button>
       ${w.custom?`<button class="mark edit-btn" data-edit="${w.id}">✎編集</button>`:''}
+      ${(!w.custom && S.editMode)?`<button class="mark edit-btn" data-fix="${w.id}">✎ 修正</button>`:''}
       <button class="mark" data-memo-toggle="${w.id}">${hasMemo?'📝 編集':'📝 メモ'}</button>
     </div>
     <div>
-      <div class="en">${w.custom?'<span class="badge-custom">自作</span>':''}${esc(w.statement)}</div>
+      <div class="en">${w.custom?'<span class="badge-custom">自作</span>':''}${w.fixed?'<span class="badge-custom" style="background:var(--warn)">修正済</span>':''}${esc(w.statement)}</div>
       <div class="ja">正解：${w.answer?'○（正しい）':'✕（誤り）'}</div>
       <div class="note" data-hl-id="${w.id}">${w.citation?esc(w.citation)+'　':''}${highlightedHTML(w.id, w.explanation)}</div>
       ${memoBlock}
@@ -806,6 +831,8 @@ function bindListBody(){
       const id=li.dataset.id;
       const ed=e.target.closest('[data-edit]');
       if(ed){ e.stopPropagation(); openAddForm(ed.dataset.edit); return; }
+      const fx=e.target.closest('[data-fix]');
+      if(fx){ e.stopPropagation(); openFixForm(fx.dataset.fix); return; }
       const mt=e.target.closest('[data-memo-toggle]');
       if(mt){ e.stopPropagation();
         if(expandedMemos.has(id)) expandedMemos.delete(id); else expandedMemos.add(id);
@@ -910,6 +937,75 @@ function saveAddForm(){
   closeAddForm();
   render();
   toast(editingId?'更新しました':'追加しました');
+}
+
+/* ---------- FIX BUILT-IN QUESTION (typo correction) ---------- */
+let fixAnswerVal=null, fixingId=null;
+function fixFormHTML(w){
+  return `<div class="add-modal">
+    <div class="add-head">
+      <div class="add-title">問題を修正</div>
+      <button id="fixClose" class="iconbtn" title="閉じる">✕</button>
+    </div>
+    <div class="add-body">
+      <div class="flabel">第${w.chNum}章 ${esc(w.chName)}${w.major?'／'+esc(w.major):''}${w.label!==undefined?'　'+esc(String(w.label)):''}</div>
+      <div class="flabel">問題文</div>
+      <textarea id="fxStatement" rows="4">${esc(w.statement)}</textarea>
+      <div class="flabel">正誤</div>
+      <div class="oxbtns small">
+        <button type="button" class="oxbtn maru" data-v="true">○</button>
+        <button type="button" class="oxbtn batsu" data-v="false">✕</button>
+      </div>
+      <div class="flabel">出典（任意）</div>
+      <input id="fxCitation" type="text" value="${esc(w.citation)}">
+      <div class="flabel">解説</div>
+      <textarea id="fxExplanation" rows="5">${esc(w.explanation)}</textarea>
+    </div>
+    <div class="add-foot">
+      ${w.fixed?'<button id="fxRevert" class="danger">元に戻す</button>':'<span></span>'}
+      <button id="fxSave" class="btn-main">保存</button>
+    </div>
+  </div>`;
+}
+function openFixForm(id){
+  fixingId = id;
+  const w = ALL_Q.find(x=>x.id===id);
+  if(!w) return;
+  fixAnswerVal = w.answer;
+  const ov=$('#addOverlay');
+  ov.innerHTML = fixFormHTML(w);
+  ov.style.display='flex';
+  document.querySelectorAll('#addOverlay .oxbtn').forEach(b=>{
+    if((b.dataset.v==='true')===fixAnswerVal) b.classList.add('sel');
+    b.onclick=()=>{
+      fixAnswerVal = b.dataset.v==='true';
+      document.querySelectorAll('#addOverlay .oxbtn').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+    };
+  });
+  $('#fixClose').onclick=closeAddForm;
+  $('#fxSave').onclick=saveFixForm;
+  const rv=$('#fxRevert');
+  if(rv) rv.onclick=()=>{
+    if(confirm('この問題を元の内容に戻しますか？')){
+      delete fixes[fixingId];
+      saveFixes(); rebuildIndexes(); closeAddForm(); render();
+      toast('元に戻しました');
+    }
+  };
+}
+function saveFixForm(){
+  const statement=$('#fxStatement').value.trim();
+  const citation=$('#fxCitation').value.trim();
+  const explanation=$('#fxExplanation').value.trim();
+  if(!statement){ toast('問題文を入力してください'); return; }
+  if(fixAnswerVal===null){ toast('正誤を選んでください'); return; }
+  fixes[fixingId] = { q: statement, a: fixAnswerVal, c: citation, e: explanation };
+  saveFixes();
+  rebuildIndexes();
+  closeAddForm();
+  render();
+  toast('修正しました');
 }
 
 /* ---------- QUIZ VIEW ---------- */
@@ -1129,6 +1225,12 @@ $('#btnTheme').onclick=()=>{
   try{ localStorage.setItem('theme_v1', d); }catch(e){}
 };
 $('#btnAdd').onclick=()=>openAddForm(null);
+$('#btnFixMode').onclick=()=>{
+  S.editMode=!S.editMode;
+  $('#btnFixMode').setAttribute('aria-pressed',S.editMode);
+  render();
+  toast(S.editMode?'誤字修正モード：ON（各問題に✎修正ボタンが表示されます）':'誤字修正モードを終了しました');
+};
 
 (async()=>{
   app.innerHTML=`<div class="empty">読み込み中...</div>`;
