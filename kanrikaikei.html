@@ -1022,8 +1022,13 @@ function viewQuiz(){
     const answered=Q.qs.filter(q=>q._userAns!==null);
     const ok=answered.filter(q=>q._userAns===q.answer).length;
     const missed=answered.filter(q=>q._userAns!==q.answer);
+    const dame=Q.qs.filter(q=>(status[q.id]||0)===1);
     const skipped=Q.qs.length-answered.length;
     const pc=answered.length? Math.round(ok/answered.length*100):0;
+    const renderReview=(list)=>`<ol class="list">${list.map(m=>`<li class="item" style="grid-template-columns:1fr">
+        <div><div class="en">${esc(m.statement)}</div>
+        <div class="ja">正解：${m.answer?'○（正しい）':'✕（誤り）'}</div>
+        <div class="note">${esc((m.citation?m.citation+'　':'')+m.explanation)}</div></div></li>`).join('')}</ol>`;
     app.innerHTML=`<div class="score">
       <div class="big">${ok} <span style="font-size:22px;color:var(--ink-3)">/ ${answered.length}</span></div>
       <div class="mini" style="margin-top:10px">正答率 ${pc}％${skipped?'　（未回答 '+skipped+'問）':''}</div>
@@ -1032,11 +1037,8 @@ function viewQuiz(){
         <button class="btn-main" id="again" style="border:1px solid var(--ink)">もう一度</button>
         <button id="toList">一覧に戻る</button>
       </div></div>
-      ${missed.length? `<div class="sec"><h2>間違えた問題（${missed.length}問）</h2><span></span></div>
-      <ol class="list">${missed.map(m=>`<li class="item" style="grid-template-columns:1fr">
-        <div><div class="en">${esc(m.statement)}</div>
-        <div class="ja">正解：${m.answer?'○（正しい）':'✕（誤り）'}</div>
-        <div class="note">${esc((m.citation?m.citation+'　':'')+m.explanation)}</div></div></li>`).join('')}</ol>`:''}`;
+      ${missed.length? `<div class="sec"><h2>間違えた問題（${missed.length}問）</h2><span></span></div>${renderReview(missed)}`:''}
+      ${dame.length? `<div class="sec"><h2>「ダメ」に設定されている問題（${dame.length}問）</h2><span></span></div>${renderReview(dame)}`:''}`;
     $('#navBack').onclick=()=>{ Q.i=Q.qs.length-1; render(); };
     $('#again').onclick=()=>{ S.quiz=null; startQuiz(); };
     $('#toList').onclick=()=>{ S.quiz=null; setView('list'); };
